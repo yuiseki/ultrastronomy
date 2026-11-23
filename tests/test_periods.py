@@ -56,3 +56,24 @@ def test_power_follows_the_exponential_law_for_white_noise():
     z = periods.lomb_scargle(t, rng.normal(0, 1, 400), freqs)
     assert z.mean() == pytest.approx(1.0, abs=0.1)
     assert (z > math.log(100)).mean() == pytest.approx(0.01, abs=0.01)
+
+
+def test_power_equals_the_textbook_form():
+    """The implementation avoids building the rotated arrays; the result must not differ."""
+    t, y = sampled(0.6, 0.1, n=200)
+    freqs = np.linspace(0.05, 5, 300)
+    yy = y - y.mean()
+    expected = []
+    for w in 2 * np.pi * freqs:
+        tau = np.arctan2(np.sin(2 * w * t).sum(), np.cos(2 * w * t).sum()) / (2 * w)
+        c, s = np.cos(w * (t - tau)), np.sin(w * (t - tau))
+        expected.append(0.5 * ((c @ yy) ** 2 / (c @ c) + (s @ yy) ** 2 / (s @ s)) / yy.var(ddof=1))
+    assert periods.lomb_scargle(t, y, freqs) == pytest.approx(np.array(expected), abs=1e-9)
+
+
+def test_several_series_in_one_pass_give_what_they_give_alone():
+    t, a = sampled(0.6, 0.1, n=120)
+    _, b = sampled(2.3, 0.2, n=120, seed=9)
+    together = periods.best_periods(t, [a, b])
+    assert together[0] == periods.best_period(t, a)
+    assert together[1]["period"] == pytest.approx(periods.best_period(t, b)["period"])

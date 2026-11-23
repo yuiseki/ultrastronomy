@@ -10,6 +10,7 @@ The mission measures by how much, on stars not catalogued as variable.
 from __future__ import annotations
 
 import math
+from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 
@@ -21,6 +22,7 @@ OVERSAMPLE = 3
 ALIAS_HALF_WIDTH = 0.005
 TOLERANCE = 0.01                   # a period within 1% counts as the same period
 CHUNK = 1000
+THREADS = 4
 
 
 def frequency_grid(span_days: float) -> np.ndarray:
@@ -40,16 +42,28 @@ def lomb_scargle(t: np.ndarray, y: np.ndarray, freqs: np.ndarray) -> np.ndarray:
     series = y[:, None] if y.ndim == 1 else y
     series = series - series.mean(axis=0)
     variance = series.var(axis=0, ddof=1)
-    out = np.empty((len(freqs), series.shape[1]))
-    for start in range(0, len(freqs), CHUNK):
+    n = len(t)
+
+    def chunk(start: int) -> np.ndarray:
         phase = 2 * np.pi * freqs[start:start + CHUNK][:, None] * t
         c0, s0 = np.cos(phase), np.sin(phase)
-        # Scargle's time offset tau, from the double-angle sums: tan(2 w tau) = sum sin(2wt) / sum cos(2wt).
-        shift = 0.5 * np.arctan2((2 * c0 * s0).sum(1), (c0 * c0 - s0 * s0).sum(1))
-        ct, st = np.cos(shift)[:, None], np.sin(shift)[:, None]
-        c, s = c0 * ct + s0 * st, s0 * ct - c0 * st
-        out[start:start + CHUNK] = 0.5 * ((c @ series) ** 2 / (c * c).sum(1)[:, None]
-                                          + (s @ series) ** 2 / (s * s).sum(1)[:, None]) / variance
+        # Scargle rotates the phases by w*tau, with tan(2 w tau) = sum sin(2wt) / sum cos(2wt),
+        # so that the cosine and sine terms are orthogonal. The rotated sums follow from the
+        # unrotated ones, which saves building the rotated arrays.
+        cc = np.einsum("ij,ij->i", c0, c0)
+        cs = np.einsum("ij,ij->i", c0, s0)
+        theta = 0.5 * np.arctan2(2 * cs, 2 * cc - n)
+        ct, st = np.cos(theta), np.sin(theta)
+        sum_c2 = cc * ct * ct + 2 * cs * st * ct + (n - cc) * st * st
+        sum_s2 = n - sum_c2
+        yc, ys = c0 @ series, s0 @ series
+        top_c = yc * ct[:, None] + ys * st[:, None]
+        top_s = ys * ct[:, None] - yc * st[:, None]
+        return 0.5 * (top_c ** 2 / sum_c2[:, None] + top_s ** 2 / sum_s2[:, None]) / variance
+
+    # The chunks are independent, and numpy releases the interpreter lock inside them.
+    with ThreadPoolExecutor(max_workers=THREADS) as pool:
+        out = np.concatenate(list(pool.map(chunk, range(0, len(freqs), CHUNK))))
     return out[:, 0] if y.ndim == 1 else out
 
 
