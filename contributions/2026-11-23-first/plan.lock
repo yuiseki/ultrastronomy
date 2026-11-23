@@ -14,6 +14,6 @@
     "mission/ground_truth.tsv": "0bf32c8782b50384fc0d470dab6214bd6fe112fba15176c27e7d221979db39fa",
     "mission/mission.json": "f01042d4072bf0b9f5cb30979e1e6bdaa658dac5d214664ee08b2bb125408a6e"
   },
-  "git_commit": "6d27e00382addcf2c088cd699177fd15bd333956",
+  "git_commit": "54c56cfdf65916e66a73f3175278b431845cec51",
   "locked_at": "2026-11-23T11:13:08Z"
 }

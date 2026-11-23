@@ -9,7 +9,7 @@ Everything here was done on 2026-11-23 with Claude Code subagents, one run per c
 The task and the rubric are in [tasks/rediscovery.md](tasks/rediscovery.md). The rubric was written by the author of the harness, before either run, with the harness's mechanisms in mind. That favours the harness condition.
 
 - Bare: light curves and the list of known objects, no harness, no skills. Built with `prepare_bare_task.py`.
-- Harness: a copy of the repository at commit ed78d0e (the first version), empty cache, live requests to Fink.
+- Harness: a copy of the repository at commit 3367854 (the first version), empty cache, live requests to Fink.
 
 | # | Item | Bare | Harness |
 |---|---|---|---|
@@ -88,7 +88,7 @@ The review's summary of the first version was that the gates stop carelessness a
 
 ## 4. The rebuilt version, with a different agent and a weaker model
 
-After the rebuild (commit 5392acf), the harness task was given to OpenCode with a free model (`opencode/deepseek-v4.1-flash-free`), in a container, using the runner from Geo-Ref-skills. It had `AGENTS.md`, the skills and the code, and nothing from this directory. Codex was meant to run the same task; its login for evals had expired, so it did not run.
+After the rebuild (commit e36916d), the harness task was given to OpenCode with a free model (`opencode/deepseek-v4.1-flash-free`), in a container, using the runner from Geo-Ref-skills. It had `AGENTS.md`, the skills and the code, and nothing from this directory. Codex was meant to run the same task; its login for evals had expired, so it did not run.
 
 - It finished every step in about 15 minutes and passed all 12 gates. The record is `contributions/2026-11-23-opencode/`.
 - The first `ultra fetch` failed with HTTP 502 after 84 requests. It ran the command again; the retry needed 26 more, and both attempts were counted against the budget of 130.
