@@ -41,6 +41,10 @@ A telescope on the ground observes at night, so its measurements repeat every da
 
 A catalogued period that is not found has several possible reasons, and the run cannot tell them apart: too few epochs, an amplitude below the noise, a period near one day, a non-sinusoidal shape, or a wrong period in the catalogue.
 
+## A run at the edge
+
+The rule gives a verdict from 10 stars a side. A run with exactly 10, or a `supported` whose interval starts just above zero, is a marginal result: say so in your inferences. Finding the `found by ZTF` group mostly at half the catalogued period is expected and is not a problem: many of them are eclipsing pairs.
+
 ## Choosing e
 
 There is no correct value. Small e (3) finds more catalogued periods and flags more of everything. Large e (20) flags little and misses faint variables. Whatever you choose, say why, and do not look at any light curve first. The measured text reports 3, 5, 10 and 20 regardless, so the choice decides only which line the verdict is read from.

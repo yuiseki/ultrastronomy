@@ -503,3 +503,10 @@ def test_true_is_not_a_number_of_weeks():
     plan = new_plan(DEMO, "x")
     plan["data"]["weeks"] = True
     assert any("weeks" in p for p in plan_problems(plan, DEMO))
+
+
+@pytest.mark.parametrize("identifier", ["VSX-292449", "ZTFDR-821205300002388", "ZTF21aarjibk"])
+def test_identifiers_of_every_mission_are_kept_out_of_the_inferences(demo, identifier):
+    # Found by an agent running the periods mission: only the first mission's identifiers were matched.
+    append_to_section(demo, "Inferred", f"{identifier} is probably an eclipsing pair.")
+    assert failed(demo) == ["report_structure"]

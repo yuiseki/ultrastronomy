@@ -37,7 +37,7 @@ There is no `measured` kind: measured statements are the program's. At least one
 
 ## Steps
 
-1. Read `runs/<name>/measured.md`. Read `ultra-alert-photometry` if you have not.
+1. Read `runs/<name>/measured.md`. Read the mission's reading skill if you have not: `ultra-periods` for `ztf-known-periods`, `ultra-alert-photometry` for `ztf-nuclear-transients`.
 2. Write `runs/<name>/claims.json`.
 3. Write `runs/<name>/report.md`: the line `# Run <name>`, then the three sections.
 4. Run `uv run ultra gates runs/<name>`. Fix what it names. Never edit `results.json` or `measured.md`; if they look wrong, run `ultra evaluate` again and report the problem.
@@ -46,20 +46,22 @@ There is no `measured` kind: measured statements are the program's. At least one
 
 ## What goes under "Not verified"
 
-At the least:
+At the least, for every mission:
 
-- Whether any object is what its label says. The screen ranks; it does not classify.
-- Any background object that passed the screen: give its identifier and that nothing examined it. Say nothing about what it might be.
-- The real inspection load. Strata are sampled in equal numbers, and a busy class is sampled from one night.
-- That the positive side is the same known objects as in every other run, selected for looking like this.
-- Sensitivity on the real sky. The injection is ideal flares on a made-up schedule.
-- Weeks or classes that returned nothing, and that the cause is not known.
+- Whether any object is what its label or its catalogue entry says. The search ranks and flags; it does not classify.
+- Any background object that was flagged or passed: give its identifier and that nothing examined it. Say nothing about what it might be.
+- Groups that came out smaller than asked, and that the cause is not known.
+- That objects from the same week or patch are not independent, and that a verdict whose interval barely clears zero is marginal.
 - Anything you said from background knowledge.
 - Problems with the harness or a skill, under a `### Harness and skills` sub-heading.
 
+For `ztf-nuclear-transients` also: the real inspection load (classes are sampled in equal numbers, a busy one from a single night); that the positives are the same known objects in every run, selected for looking like this; sensitivity on the real sky (the injection is ideal flares on a made-up schedule).
+
+For `ztf-known-periods` also: why each catalogued period was missed (the run cannot tell the causes apart); whether the catalogued periods are right; that the share of uncatalogued stars flagged is not a false-alarm rate; sensitivity to real variables (the injection adds sinusoids).
+
 ## Wording
 
-The known objects were re-found, not found. An object that passed the screen is an object that passed the screen.
+The known objects were re-found, not found. An object that passed the screen, or a star that was flagged, is exactly that and nothing more.
 
 Do not call anything a candidate, a detection of something, or consistent with being something. Those are the first steps of an announcement, and a run has no way to take the later ones: classification needs a spectrum, and reporting goes through the Transient Name Server and the people who work on that kind of object.
 

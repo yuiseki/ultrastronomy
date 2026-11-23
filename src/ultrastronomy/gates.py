@@ -23,7 +23,9 @@ from .run import changed_since_lock, file_sha256, parse_time, read_json
 
 CLAIM_KINDS = {"inferred", "unverified"}
 REPORT_SECTIONS = ["Measured", "Inferred", "Not verified"]
-OBJECT_ID = re.compile(r"ZTF\d{2}[a-z]{7}|SYN-[A-Z]+-\d{3}")
+# The identifiers of every mission: ZTF alert objects, the demo's synthetic ones,
+# VSX entries and ZTF data-release sources.
+OBJECT_ID = re.compile(r"ZTF\d{2}[a-z]{7}|SYN-[A-Z]+-\d{3}|VSX-\d+|ZTFDR-\d+")
 # A lint, not a guarantee: it catches the common ways of announcing a find and
 # is easy to evade on purpose. It cannot tell a denial from an announcement.
 ANNOUNCEMENT = re.compile(

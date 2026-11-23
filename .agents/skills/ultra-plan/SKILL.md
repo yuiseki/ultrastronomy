@@ -32,7 +32,7 @@ Leave `mission`, `kind` and `data.source` as `ultra init` wrote them.
 | `failure_interpretation` | What it means if the claim is rejected, and which changes you will not make to rescue it |
 | `alternative_explanations` | Reasons the claim could come out supported while being wrong. See below |
 | `seen_before_lock` | Everything you had read or been told about results before locking. "Nothing" is a valid answer only if true |
-| `ai_budget` | The person's limit, in their words. Already filled in by `ultra init` |
+| `ai_budget` | The person's limit, in their words: pass their words to `ultra init --ai-budget` as they said them, not a summary. It is recorded and shared with the record |
 | `data.seed` | Any integer, picked without looking at data: a random number is best. It decides which weeks of the archive your run samples. Avoid seeds already used: those in `contributions/*/plan.json`, and 20261123 from the mission README |
 | the other `data` fields | How much to sample: `weeks` and `per_class`, or `patches` and `per_stratum`, depending on the mission. The defaults are a small run. Below 10 objects on either side of the comparison the rule gives no verdict |
 | `data.max_requests` | The most network requests this run may make, over all attempts. `ultra lock` refuses a plan that cannot fit and says how many it needs |
@@ -41,7 +41,7 @@ The rule is applied by the program to the difference in pass rates, positives mi
 
 ## Other explanations to consider
 
-Write the ones that apply to this run. Leave out the ones that do not.
+Write the ones that apply to this run. Leave out the ones that do not. The first five below are about `ztf-nuclear-transients`; for `ztf-known-periods` take them from that mission's README (an incomplete catalogue, wrong catalogued periods, the selection by brightness and period) and keep the one about chance.
 
 - Circularity: the known objects were chosen by a classifier and by eye for looking like this, and the threshold used by earlier runs was picked after their scores had been seen. The positive side is the same 19 objects in every run. A new run repeats the background side only; it is not an independent replication of the recall.
 - Observation effort: the number of detections and the duration depend on how often that field was observed, not only on the object.

@@ -149,12 +149,16 @@ What its unfinished run showed, unverified and from its `measured.md` only:
 
 Two things followed. The search was made about four times faster without changing its formula, with a test against the textbook form. And what a record stores was rounded, after a test showed that searching two series together and apart differ in the fourteenth digit: a record has to recompute to the same numbers on a machine with a different linear-algebra library.
 
-A run of this mission by an outside agent, from start to export, has not yet happened.
+Given the faster version, Qoder then completed the mission from start to export in under its 45 minutes (seed 745812): the period of 6 of 10 variables catalogued without ZTF found, 2 of 12 uncatalogued stars flagged, verdict supported with an interval that barely clears zero, which its report says. So three runs on three seeds put the share of uncatalogued stars flagged at none of 11, 2 of 12 and 9 of 16.
+
+Its report of unclear instructions found a real hole: the rule that keeps object identifiers out of the inferences matched the first mission's identifiers only. That is fixed and tested. It also listed where the skills still spoke only of the first mission; those passages now cover both.
+
+Its record is not in `contributions/` yet. It recomputes from the data the agent downloaded, but the independent re-download could not be done: one request to IRSA, for the background cone of the first patch, did not answer within 400 seconds on the day. A record goes in when someone else's download reproduces it, not before.
 
 ## What has not been measured
 
 - The fourth version of the gates has not been attacked.
-- Codex and Gemini CLI have not been tried. OpenCode has completed a run of the first mission; Qoder started the second and ran out of time.
+- Codex and Gemini CLI have not been tried. OpenCode has completed a run of the first mission and Qoder a run of the second.
 - The bare condition has not been run with a weaker model, so there is still no measurement of whether the harness makes a weaker model more correct, only that such a model can complete a run.
 - No person who is not the author has followed the README.
 - Each condition was run once.

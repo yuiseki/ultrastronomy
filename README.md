@@ -74,7 +74,7 @@ When the gates pass, `uv run ultra export runs/<name>` copies the record (no raw
 ## Status
 
 - Review: the gates have been attacked three times by other agents and broken three times: 24 of 31 edited records passed the first version, then 9 of 10, then 8 of 10. Each case that can be closed locally is now a test. The fourth version has not been attacked. Expect it to break. What a determined forger can still do is listed in [docs/design.md](docs/design.md).
-- Agents: a full run has been completed by a Claude Code subagent and by OpenCode with a free model, once each. Codex and Gemini CLI have not been tried. The skills follow the [Agent Skills specification](https://agentskills.io/specification) and the entry point is a plain `AGENTS.md`. `CLAUDE.md` and `.claude/skills` only point Claude Code at `AGENTS.md` and `.agents/skills`; they hold nothing of their own.
+- Agents: a full run has been completed by a Claude Code subagent, by OpenCode with a free model, and by Qoder, once each. Codex and Gemini CLI have not been tried. The skills follow the [Agent Skills specification](https://agentskills.io/specification) and the entry point is a plain `AGENTS.md`. `CLAUDE.md` and `.claude/skills` only point Claude Code at `AGENTS.md` and `.agents/skills`; they hold nothing of their own.
 - Missions: two. `ztf-known-periods` is the one to start with.
 - Injection: uses a simplified model of when ZTF observes, not the real schedule, and ideal hosts.
 - Screen: version 1 has known weaknesses, listed in `src/ultrastronomy/score.py`, and its thresholds have not been checked against the paper they are modelled on.
