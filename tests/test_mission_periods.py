@@ -67,7 +67,7 @@ def finished_run(tmp_path_factory):
         assert cli.main(["fetch", str(run), "--confirm"]) == 0
         assert cli.main(["evaluate", str(run)]) == 0
     write_json(run / "claims.json", [{"kind": "unverified", "text": "everything", "basis": "a fake sky"}])
-    (run / "report.md").write_text("# Test\n\n## Measured\n\n" + (run / "measured.md").read_text() +
+    (run / "report.md").write_text("# Run p\n\n## Measured\n\n" + (run / "measured.md").read_text() +
                                    "\n## Inferred\n\nNothing.\n\n## Not verified\n\n- Everything.\n")
     return run, root / "cache"
 

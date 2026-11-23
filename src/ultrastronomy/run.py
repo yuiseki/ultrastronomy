@@ -43,12 +43,17 @@ def file_sha256(path: Path) -> str:
 # mission file, makes an older record impossible to recompute with this code.
 # The gates, the command line and this file are not in the list: tightening a
 # check must not invalidate the records it checks.
-COMPUTE = ("lightcurve.py", "score.py", "intervals.py", "synth.py", "fink.py", "mission.py")
+COMPUTE = {
+    "screen": ("lightcurve.py", "score.py", "intervals.py", "synth.py", "fink.py", "mission.py"),
+    "periods": ("periods.py", "catalogues.py", "mission_periods.py", "intervals.py", "fink.py", "mission.py"),
+}
 
 
-def changed_since_lock(record: dict, mission_dir: Path) -> list[str]:
-    now_hashes = code_hashes(mission_dir)
-    keys = [k for k in now_hashes if k in COMPUTE or k.startswith("mission/")]
+def changed_since_lock(record: dict, mission: dict) -> list[str]:
+    """Modules this kind of mission computes with, and its files, that no longer match the lock."""
+    now_hashes = code_hashes(mission["dir"])
+    modules = COMPUTE[mission.get("kind", "screen")]
+    keys = [k for k in now_hashes if k in modules or k.startswith("mission/")]
     return sorted(k for k in keys if record["code_sha256"].get(k) != now_hashes[k])
 
 
@@ -57,8 +62,8 @@ def code_hashes(mission_dir: Path | None = None) -> dict:
     package = Path(__file__).parent
     hashes = {p.name: file_sha256(p) for p in sorted(package.glob("*.py"))}
     if mission_dir:
-        hashes.update({f"mission/{p.name}": file_sha256(p) for p in sorted(mission_dir.iterdir())
-                       if p.suffix in (".json", ".tsv")})
+        hashes.update({f"mission/{p.relative_to(mission_dir)}": file_sha256(p)
+                       for p in sorted(mission_dir.rglob("*")) if p.is_file() and p.name != "README.md"})
     return hashes
 
 
@@ -111,7 +116,7 @@ def plan_problems(plan: dict, mission: dict) -> list[str]:
     if not isinstance(data.get("seed"), int) or isinstance(data.get("seed"), bool):
         problems.append("`data.seed` must be an integer you choose")
     for key in mission.get("plan_defaults", {"weeks": 6, "per_class": 2, "max_requests": 130}):
-        if not isinstance(data.get(key), int) or data.get(key) < 1:
+        if not isinstance(data.get(key), int) or isinstance(data.get(key), bool) or data.get(key) < 1:
             problems.append(f"`data.{key}` must be a positive integer")
     return problems
 
@@ -123,6 +128,10 @@ def lock(run: Path, mission: dict) -> dict:
         raise ValueError("plan is not ready to lock:\n  - " + "\n  - ".join(problems))
     if (run / "plan.lock").exists():
         raise ValueError("plan is already locked. Start a new run to change it.")
+    from .gates import announcement_words
+    words = announcement_words([str(plan.get(key, "")) for key in REQUIRED_TEXT] + list(map(str, plan["alternative_explanations"])))
+    if words:
+        raise ValueError(f"the plan uses announcement wording: {words}. A plan states what will be measured.")
     record = {"plan_sha256": file_sha256(run / "plan.json"), "code_sha256": code_hashes(mission["dir"]),
               "git_commit": git_commit(), "locked_at": now()}
     write_json(run / "plan.lock", record)
@@ -137,7 +146,7 @@ def require_lock(run: Path, mission: dict) -> dict:
     record = read_json(run / "plan.lock")
     if file_sha256(run / "plan.json") != record["plan_sha256"]:
         raise ValueError("plan.json changed after it was locked. Start a new run instead.")
-    changed = changed_since_lock(record, mission["dir"])
+    changed = changed_since_lock(record, mission)
     if changed:
         raise ValueError(f"changed since the plan was locked: {changed}. "
                          f"Check out commit {record.get('git_commit') or '(unknown)'} or start a new run.")

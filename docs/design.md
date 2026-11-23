@@ -37,11 +37,11 @@ Each line is a mechanism in code with a test in `tests/test_harness.py`.
 
 | Risk | Mechanism |
 |---|---|
-| The comparison is chosen after seeing results | `fetch` and `evaluate` refuse to run until `lock` has hashed the plan. A changed plan fails every later command |
-| The code or the mission is changed after the fact | The lock hashes every module of the package and the mission's files, and records the git commit. The modules that compute, and the mission files, must still match; the gates and the command line may change without invalidating a record |
+| The comparison is chosen after seeing results | `fetch` and `evaluate` refuse to run until `lock` has hashed the plan. A changed plan fails every later command, and `plan.lock` must equal the lock event the harness logged |
+| The code or the mission is changed after the fact | The lock hashes every module of the package and the mission's files, and records the git commit. The modules that kind of mission computes with, and the mission files, must still match; the gates and the command line may change without invalidating a record |
 | The verdict is chosen by the agent | The program applies the locked rule |
 | A stored number is wrong, edited or invented | The gates do not read the stored results as truth: they recompute them from the data and the locked plan and require equality, including the injection table |
-| A number is typed or misremembered in the report | The `## Measured` section, and `measured.md`, must equal the text the program generated. Nothing but a title may precede the section, and HTML is not allowed |
+| A number is typed or misremembered in the report | The `## Measured` section, and `measured.md`, must equal the text the program generated. The title is fixed by the run's name. The agent's sections may hold paragraphs, lists and `###` headings: no links, images, HTML, tables, quotes or code |
 | A true number is put under a false sentence | The agent cannot write measured statements at all; its claims are `inferred` or `unverified`, each with a basis |
 | A guess about one object is slipped in as a reading of the results | Object identifiers are not allowed in `## Inferred` or in an inferred claim, with formatting removed before matching |
 | A later classification leaks into the screen | Only allow-listed alert columns are requested, and the gates check the columns present in the data |
@@ -54,12 +54,14 @@ Each line is a mechanism in code with a test in `tests/test_harness.py`.
 
 ## What is not enforced
 
-Stated plainly, because the first version of this document claimed more than the code did, and two independent reviews showed it (see `evals/README.md`). The table above is what the tests cover today. It has been wrong twice.
+Stated plainly, because the first version of this document claimed more than the code did, and two independent reviews showed it (see `evals/README.md`). The table above is what the tests cover today. It has been wrong three times.
 
 - The lock is a file. Someone can delete it, change the plan and lock again. The log records two locks and the gate catches that, but the log is a file too. The ordering is only as trustworthy as the place it is published: commit the locked plan before fetching, and the commit history of the pull request shows the order.
 - Data can be read before the lock, by opening the cache or by calling the functions directly, and several seeds can be tried before one is locked. `seen_before_lock` is a declaration.
 - A cache can be filled with invented light curves, and a run on it passes the local gates. Only a re-download catches it: `ultra verify --refetch`.
-- The wording check is a lint. It flags common announcement words, fails honest denials that use the same words, and can be evaded by rephrasing.
+- The wording check is a lint. It flags common announcement words, fails honest denials that use the same words, and can be evaded by rephrasing. The rule against naming objects in inferences can be evaded too, for instance by splitting an identifier across two sentences.
+- The checking code is on the participant's machine and can be changed there. A record checked only by its author's copy of the gates has not been checked. CI runs the gates of the main branch on every new record.
+- Objects sampled from the same week or the same patch of sky share observing conditions. The decision rule counts them as independent, which makes its intervals too narrow by an amount nobody has measured.
 - Sentences in `## Inferred` and `## Not verified` are free text. They can be wrong, and can contain numbers nobody compared with anything.
 - `ultra pool` trusts the records in `contributions/`. They get there through review.
 

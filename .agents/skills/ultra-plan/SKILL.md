@@ -46,7 +46,7 @@ Write the ones that apply to this run. Leave out the ones that do not.
 - Circularity: the known objects were chosen by a classifier and by eye for looking like this, and the threshold used by earlier runs was picked after their scores had been seen. The positive side is the same 19 objects in every run. A new run repeats the background side only; it is not an independent replication of the recall.
 - Observation effort: the number of detections and the duration depend on how often that field was observed, not only on the object.
 - Sampling: a stratum is drawn from the last 3,000 alerts of its class in the sampled week. For a busy class that is the tail of one night, not a week. Objects that alert often are over-represented.
-- Chance: a run has few known objects and a small background sample.
+- Chance: a run has few known objects and a small background sample, and objects from the same week or patch are not independent of each other.
 - Label drift: a class label may stop being used partway through the archive, so a stratum covers only part of the period.
 
 ## Success

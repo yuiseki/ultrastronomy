@@ -38,7 +38,28 @@ def _plain(text: str) -> str:
     """Text with formatting tricks removed, so that the lint sees the words."""
     text = unicodedata.normalize("NFKC", text)
     text = "".join(c for c in text if unicodedata.category(c) != "Cf")
+    text = "".join("-" if unicodedata.category(c) == "Pd" else c for c in text)   # every kind of dash is a hyphen
     return re.sub(r"\s+", " ", re.sub(r"[*_`~]", "", text))
+
+
+def announcement_words(texts: list[str]) -> list[str]:
+    return sorted({m.group(0).lower() for text in texts for m in ANNOUNCEMENT.finditer(_plain(text))})
+
+
+def markup_problems(section: str) -> list[str]:
+    """Markdown an agent's section may not use: anything that shows a reader text the gates do not read as text."""
+    problems = []
+    if re.search(r"[\[\]<>|]", section):
+        problems.append("links, images, HTML and tables are not allowed (the characters [ ] < > |)")
+    for line in section.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#") and not stripped.startswith("### "):
+            problems.append("only '### ' sub-headings are allowed")
+        if re.fullmatch(r"(=+|-{2,}|_{3,}|\*{3,})", stripped):
+            problems.append("underlined headings and rules are not allowed")
+        if line.startswith("    ") or line.startswith("\t") or stripped.startswith("```"):
+            problems.append("code blocks are not allowed")
+    return sorted(set(problems))
 
 
 def report_sections(text: str) -> list[tuple[str, str]]:
@@ -74,7 +95,7 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
                        "plan.json differs from the hash in plan.lock"))
 
     # 2. The code and the mission files are the ones that were locked.
-    changed = changed_since_lock(lock, mission["dir"])
+    changed = changed_since_lock(lock, mission)
     gates.append(_gate("code_unchanged", not changed,
                        f"differs from the lock: {changed}. To check this record, use commit "
                        f"{lock.get('git_commit') or '(not recorded)'}"))
@@ -84,8 +105,14 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
     names = [e["event"] for e in events]
     data_steps = [i for i, n in enumerate(names) if n in ("sample", "fetch", "evaluate")]
     one_lock = names.count("lock") == 1 and (not data_steps or names.index("lock") < data_steps[0])
-    gates.append(_gate("locked_once_before_data", one_lock,
-                       f"the log has {names.count('lock')} lock events, or a data step before the lock"))
+    logged = next((e for e in events if e["event"] == "lock"), {})
+    same = all(logged.get(k) == lock.get(k) for k in ("plan_sha256", "code_sha256", "locked_at"))
+    gates.append(_gate("locked_once_before_data", one_lock and same,
+                       f"the log has {names.count('lock')} lock events, a data step before the lock, "
+                       "or a lock that differs from plan.lock"))
+    words = announcement_words([str(plan.get(k, "")) for k in ("claim", "rationale", "failure_interpretation", "seen_before_lock")]
+                               + [str(x) for x in plan.get("alternative_explanations", [])])
+    gates.append(_gate("plan_wording", not words, f"announcement wording in plan.json: {words}"))
 
     if not ((run / "provenance.json").exists() and (run / "results.json").exists()):
         gates.append(_gate("results_present", False, "run `ultra fetch` and `ultra evaluate` first"))
@@ -158,10 +185,10 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
     if headings != REPORT_SECTIONS:
         problems.append(f"the '## ' headings must be exactly {REPORT_SECTIONS}, in that order; found {headings}")
     preface = [line for line in report.split("\n## ")[0].splitlines() if line.strip()]
-    if len(preface) > 1 or (preface and not preface[0].startswith("# ")):
-        problems.append("only a one-line '# ' title may come before '## Measured'; put other text in a section")
-    if re.search(r"<[A-Za-z/!]", report):
-        problems.append("HTML is not allowed in the report: it can show a reader headings and text the gates do not see")
+    if preface != [f"# Run {run.name}"]:
+        problems.append(f"the report must start with the line '# Run {run.name}' and nothing else before '## Measured'")
+    for name in ("Inferred", "Not verified"):
+        problems += [f"'## {name}': {p}" for p in markup_problems(body.get(name, ""))]
     for name in ("Inferred", "Not verified"):
         if not body.get(name, "").strip():
             problems.append(f"'## {name}' is empty")
@@ -195,7 +222,7 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
     # 11. Lint for announcement wording in everything the agent wrote.
     written = [body.get("Inferred", ""), body.get("Not verified", "")]
     written += [str(v) for c in claims if isinstance(c, dict) for v in c.values()]
-    words = sorted({m.group(0).lower() for text in written for m in ANNOUNCEMENT.finditer(_plain(text))})
+    words = announcement_words(written)
     gates.append(_gate("wording_lint", not words,
                        f"announcement wording: {words}. This check cannot tell a denial from an announcement. "
                        "Do not reword until it passes: say what was measured and what was not checked, without these words"))

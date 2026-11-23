@@ -118,9 +118,29 @@ Each is a test. The lesson of the first review was that stored results cannot be
 
 A model far weaker than the one that wrote the gates broke them in half an hour. They should be expected to break again.
 
+## 6. Third review, by the same free model
+
+After the sample gate and the second mission were added, OpenCode with the free model reviewed again, this time told to write its report as it went. Ten attempts, eight passed.
+
+| Attempt | Now |
+|---|---|
+| Change the plan after results, rewrite the hash in `plan.lock`, evaluate again | Caught: `plan.lock` must equal the lock event the harness logged. A hand-edited log still passes, as documented |
+| Announcement, false numbers and an object identifier in the report's title | Caught: the title is `# Run <name>` and nothing else |
+| An object identifier written with en dashes | Caught: every kind of dash is read as a hyphen |
+| A second "Measured" heading in a blockquote, or underlined | Caught: an agent's section may hold paragraphs, lists and `###` headings only |
+| A linked file and an inline image carrying text | Caught: no links or images |
+| Announcement wording in the plan's claim | Caught at the lock and by a gate |
+| The modules of the second mission were not tied to the lock | Fixed: each kind of mission has its list of modules |
+| An identifier split across two claims | Not caught. Deliberate evasion of the identifier rule is listed under "not enforced" |
+| Replace the checking code itself on one's own machine | Not caught locally and cannot be. CI checks records with the code of the main branch |
+
+It also pointed out that objects sampled two to a week or two to a patch are not independent, so ten objects are fewer than ten independent units. That is right, and is now a stated limit of both missions.
+
+Three reviews, three sets of holes. The pattern is steady: each time the gates had taken something a run wrote as given, or had read the report less carefully than a person would. The first is now closed as far as local files allow; the second will always have another case.
+
 ## What has not been measured
 
-- The third version of the gates has not been attacked.
+- The fourth version of the gates has not been attacked.
 - Codex and Gemini CLI have not been tried. OpenCode has, once.
 - The bare condition has not been run with a weaker model, so there is still no measurement of whether the harness makes a weaker model more correct, only that such a model can complete a run.
 - No person who is not the author has followed the README.

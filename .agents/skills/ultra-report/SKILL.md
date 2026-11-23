@@ -14,7 +14,7 @@ Step 6 onwards of `ultra-rediscovery-run`: `results.json` and `measured.md` exis
 
 ## The three sections
 
-`report.md` is a one-line `# ` title followed by exactly these three `## ` headings, in this order. Nothing else comes before `## Measured`. Use `### ` for any sub-heading, and plain Markdown only: no HTML.
+`report.md` starts with the line `# Run <name>`, where `<name>` is the run's directory name, followed by exactly these three `## ` headings, in this order. Nothing else comes before `## Measured`. In your two sections use paragraphs, `- ` lists and `### ` sub-headings only: no links, images, tables, quotes, code blocks or HTML.
 
 | Section | Who writes it | Rule |
 |---|---|---|
@@ -39,7 +39,7 @@ There is no `measured` kind: measured statements are the program's. At least one
 
 1. Read `runs/<name>/measured.md`. Read `ultra-alert-photometry` if you have not.
 2. Write `runs/<name>/claims.json`.
-3. Write `runs/<name>/report.md`: a title, then the three sections.
+3. Write `runs/<name>/report.md`: the line `# Run <name>`, then the three sections.
 4. Run `uv run ultra gates runs/<name>`. Fix what it names. Never edit `results.json` or `measured.md`; if they look wrong, run `ultra evaluate` again and report the problem.
 5. Tell the person, in plain words: what was looked for, what was measured, what you infer, what was not checked, what a next run could do.
 6. Run `uv run ultra export runs/<name>`. Stop there. Committing and opening a pull request is the person's decision.
@@ -84,7 +84,7 @@ The `wording_lint` gate flags words such as "discovered", "confirmed", "novel", 
 
 ## Measured
 
-(the full text of measured.md)
+(the full text of measured.md, pasted unchanged)
 
 ## Inferred
 

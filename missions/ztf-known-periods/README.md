@@ -41,5 +41,7 @@ Taking one further is a person's work, outside a run: look at the folded light c
 - Many `found elsewhere` entries come from surveys whose periods are themselves automatic and sometimes wrong. A catalogued period that is not found may be the catalogue's error.
 - Only the r band is used, and only the longest light curve of a star when several ZTF fields cover it.
 - Outlying points are not removed before the search.
+- A real variable observed only at night also shows power at its frequency plus or minus one cycle per day. The search can settle on that alias with great confidence, and the matching rule, which accepts the period, its half and its double, then counts the star as not found. The first run showed this. The rule was left as it is: changing it after seeing which stars it loses would be tuning.
+- Stars from the same patch share a ZTF field and its observing history, so they are not independent. The rule treats them as if they were.
 - Patches in the Milky Way hold hundreds of catalogued stars and patches far from it a handful, so sparse patches contribute fewer stars than asked.
 - The frequencies near whole cycles per day are left out, so a variable with a period very close to 1 day or a simple fraction of it will not be found at that period.

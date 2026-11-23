@@ -30,6 +30,6 @@ def test_supernova_candidates_among_the_known_objects_are_not_positives():
 
 def test_results_md_is_what_the_records_give():
     """RESULTS.md is generated. If this fails, run `uv run ultra results --write`."""
-    mission = M.load_mission("ztf-nuclear-transients")
-    expected = results_markdown(ROOT / "contributions", mission, cli.pool(ROOT / "contributions"))
+    missions = {m: M.load_mission(m) for m in ("ztf-nuclear-transients", "ztf-known-periods")}
+    expected = results_markdown(ROOT / "contributions", missions, cli.pool(ROOT / "contributions"))
     assert (ROOT / "RESULTS.md").read_text(encoding="utf-8") == expected

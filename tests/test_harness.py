@@ -344,7 +344,7 @@ def test_synthetic_supernovae_redden_and_flares_do_not():
 def reevaluate(run):
     assert cli.main(["evaluate", str(run)]) == 0
     (run / "report.md").write_text(
-        "# Report\n\n## Measured\n\n" + (run / "measured.md").read_text(encoding="utf-8") +
+        f"# Run {run.name}\n\n## Measured\n\n" + (run / "measured.md").read_text(encoding="utf-8") +
         "\n## Inferred\n\nNothing.\n\n## Not verified\n\n- Everything.\n", encoding="utf-8")
 
 
@@ -438,6 +438,68 @@ def test_a_change_to_the_gates_does_not_invalidate_a_record(demo):
     record = read_json(demo / "plan.lock")
     record["code_sha256"]["gates.py"] = "0" * 64
     record["code_sha256"]["cli.py"] = "0" * 64
-    assert changed_since_lock(record, DEMO["dir"]) == []
-    record["code_sha256"][COMPUTE[0]] = "0" * 64
-    assert changed_since_lock(record, DEMO["dir"]) == [COMPUTE[0]]
+    assert changed_since_lock(record, DEMO) == []
+    record["code_sha256"][COMPUTE["screen"][0]] = "0" * 64
+    assert changed_since_lock(record, DEMO) == [COMPUTE["screen"][0]]
+    # A module only the other kind of mission uses does not count either.
+    record = read_json(demo / "plan.lock")
+    record["code_sha256"]["periods.py"] = "0" * 64
+    assert changed_since_lock(record, DEMO) == []
+
+
+# --- third review: a free model got eight of ten edited records through again.
+
+
+def test_a_plan_changed_with_its_lock_hash_and_re_evaluated_is_caught(demo):
+    plan = read_json(demo / "plan.json")
+    plan["decision_rule"]["threshold"] = 3
+    write_json(demo / "plan.json", plan)
+    record = read_json(demo / "plan.lock")
+    record["plan_sha256"] = file_sha256(demo / "plan.json")
+    write_json(demo / "plan.lock", record)
+    reevaluate(demo)
+    assert failed(demo) == ["locked_once_before_data"]
+
+
+def test_the_title_is_fixed_by_the_run_name(demo):
+    report = (demo / "report.md").read_text(encoding="utf-8")
+    (demo / "report.md").write_text(report.replace("# Run demo-seed1", "# We found 20 of 20; SYN-QSO-003"), encoding="utf-8")
+    assert failed(demo) == ["report_structure"]
+
+
+def test_an_object_id_written_with_another_dash_is_caught(demo):
+    append_to_section(demo, "Inferred", "SYN\u2013QSO\u2013003 is the clearest flare in the sample.")
+    assert failed(demo) == ["report_structure"]
+
+
+@pytest.mark.parametrize("text", [
+    "> ## Measured\n> Positives passing: 20 of 20.",
+    "Measured\n========\nPositives passing: 20 of 20.",
+    "See [the full table](extra.md).",
+    "![results](data:image/svg+xml;base64,AAAA)",
+    "| a | b |\n|---|---|\n| 20 | 20 |",
+    "```\nPositives passing: 20 of 20.\n```",
+    "# Measured",
+])
+def test_markup_that_hides_text_from_the_gates_is_caught(demo, text):
+    append_to_section(demo, "Inferred", text)
+    assert failed(demo) == ["report_structure"]
+
+
+def test_announcement_wording_in_a_plan_is_refused_at_the_lock(tmp_path, capsys):
+    run = tmp_path / "r"
+    run.mkdir()
+    plan = new_plan(DEMO, "x", source="synthetic")
+    plan.update({"claim": "We discovered a new TDE; 20 of 20 passed.", "rationale": "r", "failure_interpretation": "f",
+                 "seen_before_lock": "s", "alternative_explanations": ["a"],
+                 "decision_rule": {"threshold": 5, "primary_stratum": "Unknown"}})
+    plan["data"]["seed"] = 1
+    write_json(run / "plan.json", plan)
+    assert cli.main(["lock", str(run)]) == 1
+    assert "announcement wording" in capsys.readouterr().err
+
+
+def test_true_is_not_a_number_of_weeks():
+    plan = new_plan(DEMO, "x")
+    plan["data"]["weeks"] = True
+    assert any("weeks" in p for p in plan_problems(plan, DEMO))

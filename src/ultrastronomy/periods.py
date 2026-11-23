@@ -31,32 +31,57 @@ def frequency_grid(span_days: float) -> np.ndarray:
 
 
 def lomb_scargle(t: np.ndarray, y: np.ndarray, freqs: np.ndarray) -> np.ndarray:
-    """Scargle's normalised power: for white noise it follows exp(-z)."""
-    y = y - y.mean()
-    variance = y.var(ddof=1)
-    out = np.empty(len(freqs))
+    """Scargle's normalised power: for white noise it follows exp(-z).
+
+    `y` is one series, or several as columns sharing the same times. Several
+    are searched in one pass, since the cost is in the sines and cosines of
+    the times, not in the series.
+    """
+    series = y[:, None] if y.ndim == 1 else y
+    series = series - series.mean(axis=0)
+    variance = series.var(axis=0, ddof=1)
+    out = np.empty((len(freqs), series.shape[1]))
     for start in range(0, len(freqs), CHUNK):
-        omega = 2 * np.pi * freqs[start:start + CHUNK][:, None]
-        tau = np.arctan2(np.sin(2 * omega * t).sum(1), np.cos(2 * omega * t).sum(1))[:, None] / (2 * omega)
-        c, s = np.cos(omega * (t - tau)), np.sin(omega * (t - tau))
-        out[start:start + CHUNK] = 0.5 * ((c @ y) ** 2 / (c * c).sum(1) + (s @ y) ** 2 / (s * s).sum(1)) / variance
+        phase = 2 * np.pi * freqs[start:start + CHUNK][:, None] * t
+        c0, s0 = np.cos(phase), np.sin(phase)
+        # Scargle's time offset tau, from the double-angle sums: tan(2 w tau) = sum sin(2wt) / sum cos(2wt).
+        shift = 0.5 * np.arctan2((2 * c0 * s0).sum(1), (c0 * c0 - s0 * s0).sum(1))
+        ct, st = np.cos(shift)[:, None], np.sin(shift)[:, None]
+        c, s = c0 * ct + s0 * st, s0 * ct - c0 * st
+        out[start:start + CHUNK] = 0.5 * ((c @ series) ** 2 / (c * c).sum(1)[:, None]
+                                          + (s @ series) ** 2 / (s * s).sum(1)[:, None]) / variance
+    return out[:, 0] if y.ndim == 1 else out
+
+
+def best_periods(times, columns) -> list[dict | None]:
+    """For each series on the same times: the strongest period and its false-alarm probability."""
+    t = np.asarray(times, dtype=float)
+    series = np.asarray(columns, dtype=float).T
+    if len(t) < MIN_POINTS or np.ptp(t) <= 0:
+        return [None] * series.shape[1]
+    span = float(np.ptp(t))
+    freqs = frequency_grid(span)
+    usable = series.var(axis=0) > 0
+    power = np.zeros((len(freqs), series.shape[1]))
+    if usable.any():
+        power[:, usable] = lomb_scargle(t, series[:, usable], freqs)
+    independent = (F_MAX - F_MIN) * span
+    out = []
+    for k in range(series.shape[1]):
+        if not usable[k]:
+            out.append(None)
+            continue
+        i = int(np.argmax(power[:, k]))
+        z = float(power[i, k])
+        # 1 - (1 - e^-z)^M, written so that it does not round to zero or one.
+        log10_fap = math.log10(max(-math.expm1(independent * math.log1p(-math.exp(-z))), 1e-300))
+        out.append({"period": float(1.0 / freqs[i]), "power": z, "log10_fap": log10_fap, "n_points": int(len(t))})
     return out
 
 
 def best_period(times, mags) -> dict | None:
-    """The strongest period and its false-alarm probability, or None with too few points."""
-    t, y = np.asarray(times, dtype=float), np.asarray(mags, dtype=float)
-    if len(t) < MIN_POINTS or np.ptp(t) <= 0 or y.var() == 0:
-        return None
-    span = float(np.ptp(t))
-    freqs = frequency_grid(span)
-    power = lomb_scargle(t, y, freqs)
-    i = int(np.argmax(power))
-    z = float(power[i])
-    independent = (F_MAX - F_MIN) * span
-    # 1 - (1 - e^-z)^M, written so that it does not round to zero or one.
-    log10_fap = math.log10(max(-math.expm1(independent * math.log1p(-math.exp(-z))), 1e-300))
-    return {"period": float(1.0 / freqs[i]), "power": z, "log10_fap": log10_fap, "n_points": int(len(t))}
+    """The strongest period of one series, or None with too few points."""
+    return best_periods(times, [mags])[0]
 
 
 def match(found: float, catalogued: float) -> str:

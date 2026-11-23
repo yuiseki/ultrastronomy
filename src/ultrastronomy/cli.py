@@ -242,7 +242,7 @@ def cmd_export(a) -> int:
         shutil.copy(run / name, dest / name)
     log(run, "export", to=str(dest))
     if Path(a.contributions_dir) == Path("contributions"):
-        cmd_results(argparse.Namespace(contributions_dir=a.contributions_dir, mission=plan["mission"], write=True))
+        cmd_results(argparse.Namespace(contributions_dir=a.contributions_dir, write=True))
     print(f"copied the record to {dest}. It holds no raw data. Ask the person before committing or opening a pull request.")
     return 0
 
@@ -283,7 +283,8 @@ def cmd_pool(a) -> int:
 
 def cmd_results(a) -> int:
     from .analysis import results_markdown
-    text = results_markdown(Path(a.contributions_dir), M.load_mission(a.mission), pool(Path(a.contributions_dir)))
+    missions = {m: M.load_mission(m) for m in ("ztf-nuclear-transients", "ztf-known-periods")}
+    text = results_markdown(Path(a.contributions_dir), missions, pool(Path(a.contributions_dir)))
     if a.write:
         Path("RESULTS.md").write_text(text, encoding="utf-8")
         print("wrote RESULTS.md")
@@ -328,7 +329,7 @@ def cmd_demo(a) -> int:
          "basis": "The demo never touches real data."},
     ])
     (run / "report.md").write_text(
-        "# Demo run on synthetic data\n\n## Measured\n\n" + measured +
+        f"# Run {run.name}\n\n## Measured\n\n" + measured +
         "\n## Inferred\n\nThe pipeline runs end to end and separates idealised classes. That is all a demo can show.\n\n"
         "## Not verified\n\n- Everything about the real sky. Every light curve here comes from a formula.\n", encoding="utf-8")
     print("ultrastronomy demo: every light curve below is synthetic.\n")
@@ -391,7 +392,6 @@ def main(argv=None) -> int:
     s.set_defaults(fn=cmd_pool)
 
     s = sub.add_parser("results", help="where the mission stands, from the contributed records")
-    s.add_argument("--mission", default="ztf-nuclear-transients")
     s.add_argument("--contributions-dir", default="contributions")
     s.add_argument("--write", action="store_true", help="write RESULTS.md instead of printing")
     s.set_defaults(fn=cmd_results)

@@ -49,6 +49,7 @@ On this sample the colour and duration criteria add nothing that can be seen, an
 - An agent working without this harness reported that, on a sample of this data, its colour and fading checks changed nothing: what separated the known objects was being a single brightening at the centre of a galaxy. The comparison above found the same for this screen.
 - Alerts have far fewer points than the forced photometry the paper used. Four of the five known nuclear transients that scored below 5 in the first run lacked simultaneous g and r detections.
 - `(SIMBAD) Galaxy` returns nothing after mid 2022, so that stratum only covers the earlier period. `(SIMBAD) Seyfert_1` returned nothing for a week in March 2025 in one run. The causes were not found.
+- Objects drawn from the same week share that week's observing conditions, so they are not independent. The rule treats them as if they were.
 - Equal numbers per class is not the real mix. On one night checked (2022-03-03) Fink labelled about 100,000 alerts `Unknown` and about 1,000 `SN candidate`.
 
 ## What a run adds

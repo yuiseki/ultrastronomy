@@ -4,7 +4,7 @@ An open-source harness and skill collection that lets anyone contribute to astro
 
 SETI@home put idle computers to work on a search. ultrastronomy is for idle AI usage: point your agent at this repository, give it a budget, and it carries out a small, checkable piece of research on public sky data and leaves a record others can verify.
 
-It is early. There is one mission, and it looks for nothing new.
+It is early. There are two missions, and neither looks for anything new.
 
 ## What a run does
 
@@ -64,9 +64,9 @@ When the gates pass, `uv run ultra export runs/<name>` copies the record (no raw
 
 ## Status
 
-- Review: an independent agent got 24 of 31 tampered records through the first version of the gates, and a free model then got 9 of 10 through the rebuilt version. Each case is now a test, and the gates have not been attacked since. What a determined forger can still do is listed in [docs/design.md](docs/design.md).
+- Review: the gates have been attacked three times by other agents and broken three times: 24 of 31 edited records passed the first version, then 9 of 10, then 8 of 10. Each case that can be closed locally is now a test. The fourth version has not been attacked. Expect it to break. What a determined forger can still do is listed in [docs/design.md](docs/design.md).
 - Agents: a full run has been completed by a Claude Code subagent and by OpenCode with a free model, once each. Codex and Gemini CLI have not been tried. The skills follow the [Agent Skills specification](https://agentskills.io/specification) and the entry point is a plain `AGENTS.md`. `CLAUDE.md` and `.claude/skills` only point Claude Code at `AGENTS.md` and `.agents/skills`; they hold nothing of their own.
-- Missions: one.
+- Missions: two. `ztf-known-periods` is the one to start with.
 - Injection: uses a simplified model of when ZTF observes, not the real schedule, and ideal hosts.
 - Screen: version 1 has known weaknesses, listed in `src/ultrastronomy/score.py`, and its thresholds have not been checked against the paper they are modelled on.
 - Data: nothing from ZTF is redistributed here. Each run fetches its own from Fink.

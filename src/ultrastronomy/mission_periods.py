@@ -100,37 +100,51 @@ def derive(plan: dict, mission: dict, cache: Path, budget, note=lambda **_: None
     return items
 
 
-def _search(rows) -> dict | None:
-    return periods.best_period([r[0] for r in rows], [r[1] for r in rows])
-
-
 def _flagged(best, exponent) -> bool:
     return best is not None and best["log10_fap"] < -exponent
 
 
 def evaluate(objects: dict, provenance: list[dict], plan: dict, mission: dict) -> dict:
-    scored, searches = [], {}
-    for p in sorted(provenance, key=lambda p: p["object_id"]):
+    e = plan["decision_rule"]["threshold"]
+    order = sorted(provenance, key=lambda p: p["object_id"])
+
+    # What will be injected into each background star is drawn first, amplitude by
+    # amplitude and star by star, so that the draw does not depend on any result.
+    rng = random.Random(plan["data"]["seed"])
+    searchable = [p["object_id"] for p in order if p["role"] == "background"
+                  and len(objects[p["object_id"]]["rows"]) >= periods.MIN_POINTS]
+    drawn = {oid: [] for oid in searchable}
+    for amplitude in AMPLITUDES:
+        for oid in searchable:
+            drawn[oid].append((amplitude, 10 ** rng.uniform(math.log10(PERIOD_RANGE[0]), math.log10(50.0)),
+                               rng.uniform(0, 2 * math.pi)))
+
+    scored, injected = [], {}
+    for p in order:
         data = objects[p["object_id"]]
-        best = searches[p["object_id"]] = _search(data["rows"])
+        times, mags = [r[0] for r in data["rows"]], [r[1] for r in data["rows"]]
+        columns = [mags] + [[m + a * math.sin(2 * math.pi * t / period + phase) for t, m in zip(times, mags)]
+                            for a, period, phase in drawn.get(p["object_id"], [])]
+        best, *with_signal = periods.best_periods(times, columns) if times else [None]
+        injected[p["object_id"]] = with_signal
         kind = periods.match(best["period"], data["cat_period"]) if best and data["cat_period"] else "none"
         scored.append({"id": p["object_id"], "role": p["role"], "label": p["label"],
                        "n_points": len(data["rows"]), "cat_period": data["cat_period"],
                        "period": best["period"] if best else None,
                        "log10_fap": best["log10_fap"] if best else None, "match": kind})
+
     labels = sorted({s["label"] for s in scored if s["role"] == "truth"})
     table = []
-    for e in EXPONENTS:
-        row = {"exponent": e, "known": {}, "background": {}}
+    for level in EXPONENTS:
+        row = {"exponent": level, "known": {}, "background": {}}
         for label in labels:
             members = [s for s in scored if s["label"] == label]
-            hits = [s for s in members if s["log10_fap"] is not None and s["log10_fap"] < -e and s["match"] != "none"]
+            hits = [s for s in members if s["log10_fap"] is not None and s["log10_fap"] < -level and s["match"] != "none"]
             row["known"][label] = {"recovered": len(hits), "exact": sum(s["match"] == "exact" for s in hits), "n": len(members)}
         bg = [s for s in scored if s["role"] == "background"]
-        row["background"][NOT_CATALOGUED] = {"flagged": sum(s["log10_fap"] is not None and s["log10_fap"] < -e for s in bg), "n": len(bg)}
+        row["background"][NOT_CATALOGUED] = {"flagged": sum(s["log10_fap"] is not None and s["log10_fap"] < -level for s in bg), "n": len(bg)}
         table.append(row)
 
-    e = plan["decision_rule"]["threshold"]
     positives = [s for s in scored if s["role"] == "truth" and s["label"] in mission["positive_groups"]]
     background = [s for s in scored if s["role"] == "background"]
     hit = lambda s: s["log10_fap"] is not None and s["log10_fap"] < -e
@@ -138,19 +152,13 @@ def evaluate(objects: dict, provenance: list[dict], plan: dict, mission: dict) -
         sum(hit(s) and s["match"] != "none" for s in positives), len(positives),
         sum(hit(s) for s in background), len(background))}
 
-    # Injection: a sinusoid added to real light curves of stars the search left alone.
-    rng = random.Random(plan["data"]["seed"])
-    quiet = [s["id"] for s in background if searches[s["id"]] is not None and not hit(s)]
+    # Injection results count only stars the search left alone: a star that is
+    # already flagged cannot show whether an added signal would have been found.
+    quiet = [s["id"] for s in background if s["id"] in drawn and not hit(s)]
     injection = []
-    for amplitude in AMPLITUDES:
-        recovered = 0
-        for oid in quiet:
-            rows = objects[oid]["rows"]
-            period = 10 ** rng.uniform(math.log10(PERIOD_RANGE[0]), math.log10(50.0))
-            phase = rng.uniform(0, 2 * math.pi)
-            mags = [m + amplitude * math.sin(2 * math.pi * t / period + phase) for t, m, _ in rows]
-            best = periods.best_period([r[0] for r in rows], mags)
-            recovered += bool(_flagged(best, e) and periods.match(best["period"], period) != "none")
+    for k, amplitude in enumerate(AMPLITUDES):
+        recovered = sum(bool(_flagged(injected[oid][k], e)
+                             and periods.match(injected[oid][k]["period"], drawn[oid][k][1]) != "none") for oid in quiet)
         injection.append({"amplitude": amplitude, "recovered": recovered, "n": len(quiet)})
 
     return {"data_source": plan["data"]["source"], "objects": scored, "table": table, "decision": decision,
