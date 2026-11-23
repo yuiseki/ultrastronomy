@@ -23,6 +23,7 @@ ALIAS_HALF_WIDTH = 0.005
 TOLERANCE = 0.01                   # a period within 1% counts as the same period
 CHUNK = 1000
 THREADS = 4
+PERIOD_DECIMALS, FAP_DECIMALS = 6, 3
 
 
 def frequency_grid(span_days: float) -> np.ndarray:
@@ -89,7 +90,10 @@ def best_periods(times, columns) -> list[dict | None]:
         z = float(power[i, k])
         # 1 - (1 - e^-z)^M, written so that it does not round to zero or one.
         log10_fap = math.log10(max(-math.expm1(independent * math.log1p(-math.exp(-z))), 1e-300))
-        out.append({"period": float(1.0 / freqs[i]), "power": z, "log10_fap": log10_fap, "n_points": int(len(t))})
+        # Rounded on purpose. Linear-algebra libraries differ in the last digits between
+        # machines, and a record must recompute to the same numbers on another one.
+        out.append({"period": round(float(1.0 / freqs[i]), PERIOD_DECIMALS),
+                    "log10_fap": round(log10_fap, FAP_DECIMALS), "n_points": int(len(t))})
     return out
 
 
