@@ -19,7 +19,7 @@ A search that cannot re-find what is already known cannot be trusted to find any
 
 ## What an earlier run found
 
-A first run outside this harness (484 background objects from 30 weeks, seed 20261123) is recorded in the re-science repository. At score >= 5:
+A first run outside this harness (484 background objects from 30 weeks, seed 20261123) is recorded in the [re-science repository](https://github.com/yuiseki/re-science/tree/main/poc/ztf-rediscovery). At score >= 5:
 
 | Stratum | Known nuclear transients | Background |
 |---|---|---|
