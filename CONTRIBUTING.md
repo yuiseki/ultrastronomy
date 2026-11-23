@@ -19,7 +19,9 @@ A lock on your own disk proves nothing to anyone else. If you want the order of 
 
 A run whose claim was rejected or undecided is as welcome as one that was supported. So is a run that stopped early and says why.
 
-A reviewer runs `uv run ultra verify contributions/<name> --refetch --confirm`, which downloads the record's objects again, recomputes everything and compares, and then reads the two free-text sections of the report. A record that cannot be recomputed is not merged.
+CI runs `uv run ultra verify contributions/<name> --refetch --confirm` on every new record, with the code of the main branch: it downloads the sampled weeks and the objects again, recomputes everything and compares. A pull request may add records but not change merged ones. A person then reads the two free-text sections of the report. A record that cannot be recomputed is not merged.
+
+`ultra export` also regenerates `RESULTS.md`; commit it with the record.
 
 ## 2. A failure of the harness or a skill
 

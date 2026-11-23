@@ -45,10 +45,14 @@ The harness does not make a record trustworthy on its own. Files on a participan
 - The measured section of a report is generated. The agent's sentences are labelled inferred or unverified and kept in their own sections.
 - Synthetic flares are injected and counted, on a made-up observing schedule: a check of where the criteria stop working on clean data, not of sensitivity on the real sky.
 - A record carries the source, time and hash of every object used. Alerts are cut at a fixed date so that a later download gives the same rows.
-- A reviewer downloads the objects again and recomputes the record before it is merged.
+- A pull request that adds a record is re-downloaded and recomputed by CI, using the code of the main branch and not the code in the pull request.
 - `supported`, `rejected` and `undecided` are all results. A run that finds the screen does not work is kept.
 
 "An AI found something" and "a finding was confirmed" are different statements. Nothing in this repository makes the second one.
+
+## Where it stands
+
+[RESULTS.md](RESULTS.md) is generated from the contributed records and cannot be edited by hand without a test failing. Today it says two things. The screen keeps about three quarters of the known objects and almost none of the bulk of the alert stream. And two catalogue flags about the host galaxy do that just as well as the full screen: the light-curve criteria add nothing this sample can show. The first mission has mostly measured its own screen and found it wanting, which is what a rediscovery test is for.
 
 ## Contribute
 

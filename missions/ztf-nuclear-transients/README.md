@@ -33,10 +33,20 @@ The threshold of 5 was chosen after the scores of the known objects had been see
 
 That run used an earlier version of the code, which counted the i band and rows without a sign flag; the harness does not. Its numbers are a guide, not a result of this harness.
 
+## What the pooled records show about the screen
+
+[RESULTS.md](../../RESULTS.md) is generated from the contributed records. Its second table compares parts of the screen. With two runs pooled:
+
+- Two flags about the host, a non-stellar catalogued source within 0.6 arcseconds, keep 15 of the 19 positives and let through 1 of 24 `Unknown`, 2 of 24 `SN candidate` and 1 of 24 `QSO` objects. Nothing about the light curve is used.
+- The rule the runs locked, any five of the six criteria, keeps 14 of 19 and lets through 0, 1 and 6 of the same strata.
+- Both let through 9 of 24 `Seyfert_1` objects.
+
+On this sample the colour and duration criteria add nothing that can be seen, and the five-of-six rule admits quasars that the host flags alone exclude. This comparison was made after the results were known and the sample is small, so it is a description, not a test. It does say where the open problem is: not in separating these flares from the bulk of the stream, which a catalogue lookup does, but in telling a flare from ordinary variability in a galaxy that is already known to be active. The paper behind the known objects makes the same point.
+
 ## Known limits
 
 - The known objects were selected for looking like tidal disruption events. A screen for that look passes them by construction, so recall here says nothing about objects no one has noticed. The claim of this mission is hard to refute for the same reason, and for one more: most `Unknown` objects have too few detections to meet `well_sampled` or either colour criterion, whatever they are.
-- An agent working without this harness reported that, on a sample of this data, its colour and fading checks changed nothing: what separated the known objects was being a single brightening at the centre of a galaxy. Whether that holds for this screen has not been tested. It is the next thing to measure.
+- An agent working without this harness reported that, on a sample of this data, its colour and fading checks changed nothing: what separated the known objects was being a single brightening at the centre of a galaxy. The comparison above found the same for this screen.
 - Alerts have far fewer points than the forced photometry the paper used. Four of the five known nuclear transients that scored below 5 in the first run lacked simultaneous g and r detections.
 - `(SIMBAD) Galaxy` returns nothing after mid 2022, so that stratum only covers the earlier period. `(SIMBAD) Seyfert_1` returned nothing for a week in March 2025 in one run. The causes were not found.
 - Equal numbers per class is not the real mix. On one night checked (2022-03-03) Fink labelled about 100,000 alerts `Unknown` and about 1,000 `SN candidate`.

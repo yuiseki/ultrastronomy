@@ -92,7 +92,8 @@ def cmd_fetch(a) -> int:
     planned, spent = M.planned_requests(plan, mission), M.requests_spent(run)
     left = plan["data"]["max_requests"] - spent
     print(f"this plan needs at most {planned} requests to the Fink API (about {planned * 4 // 60 + 1} minutes). "
-          f"Budget: {plan['data']['max_requests']}, already used by this run: {spent}. Cached objects cost nothing.")
+          f"Budget: {plan['data']['max_requests']}, already used by this run: {spent}, left: {max(left, 0)}. "
+          "Cached objects cost nothing.")
     if not a.confirm:
         print("nothing was fetched. Re-run with --confirm to go ahead.")
         return 0
@@ -243,6 +244,8 @@ def cmd_export(a) -> int:
     for name in SHARED:
         shutil.copy(run / name, dest / name)
     log(run, "export", to=str(dest))
+    if Path(a.contributions_dir) == Path("contributions"):
+        cmd_results(argparse.Namespace(contributions_dir=a.contributions_dir, mission=plan["mission"], write=True))
     print(f"copied the record to {dest}. It holds no raw data. Ask the person before committing or opening a pull request.")
     return 0
 
@@ -278,6 +281,17 @@ def pool(contributions: Path) -> dict:
 
 def cmd_pool(a) -> int:
     print(json.dumps(pool(Path(a.contributions_dir)), indent=2))
+    return 0
+
+
+def cmd_results(a) -> int:
+    from .analysis import results_markdown
+    text = results_markdown(Path(a.contributions_dir), M.load_mission(a.mission), pool(Path(a.contributions_dir)))
+    if a.write:
+        Path("RESULTS.md").write_text(text, encoding="utf-8")
+        print("wrote RESULTS.md")
+    else:
+        print(text)
     return 0
 
 
@@ -378,6 +392,12 @@ def main(argv=None) -> int:
     s = sub.add_parser("pool", help="pool the background pass rates of all contributed runs")
     s.add_argument("--contributions-dir", default="contributions")
     s.set_defaults(fn=cmd_pool)
+
+    s = sub.add_parser("results", help="where the mission stands, from the contributed records")
+    s.add_argument("--mission", default="ztf-nuclear-transients")
+    s.add_argument("--contributions-dir", default="contributions")
+    s.add_argument("--write", action="store_true", help="write RESULTS.md instead of printing")
+    s.set_defaults(fn=cmd_results)
 
     a = p.parse_args(argv)
     return a.fn(a)

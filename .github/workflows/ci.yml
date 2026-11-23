@@ -1,0 +1,63 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv run pytest -q
+
+  # A contributed record is checked with the code of the base branch, never
+  # with the code of the pull request: a pull request that also loosened a
+  # gate would otherwise be checking itself.
+  verify-records:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+      - uses: actions/checkout@v4
+        with:
+          path: pr
+      - uses: astral-sh/setup-uv@v5
+      - name: Records may be added, not changed
+        run: |
+          for dir in base/contributions/*/; do
+            name=$(basename "$dir")
+            if ! diff -r "$dir" "pr/contributions/$name" > /dev/null; then
+              echo "::error::contributions/$name was changed or removed. A record is not edited after it is merged."
+              exit 1
+            fi
+          done
+      - name: Re-download and recompute every new record
+        working-directory: base
+        run: |
+          status=0
+          for dir in ../pr/contributions/*/; do
+            name=$(basename "$dir")
+            [ -e "contributions/$name" ] && continue
+            echo "::group::$name"
+            cp -r "$dir" "contributions/$name"
+            # Exit 2 is a failed download, not a failed record: try once more.
+            uv run ultra verify "contributions/$name" --refetch --confirm || {
+              code=$?
+              if [ "$code" = 2 ]; then
+                uv run ultra verify "contributions/$name" --refetch --confirm || status=1
+              else
+                status=1
+              fi
+            }
+            echo "::endgroup::"
+          done
+          exit $status
