@@ -26,16 +26,16 @@ Leave `mission`, `kind` and `data.source` as `ultra init` wrote them.
 | Field | What to write |
 |---|---|
 | `claim` | One sentence that numbers can contradict. "At score >= T, the known nuclear transients pass more often than the S stratum." |
-| `decision_rule.threshold` | The score, 1 to 6, at which you compare. Higher keeps fewer objects on both sides |
-| `decision_rule.primary_stratum` | The background class you compare against. `Unknown` is most of the real alert stream |
+| `decision_rule.threshold` | The level at which you compare; the mission README says what it is and its range. Higher keeps fewer objects on both sides |
+| `decision_rule.primary_stratum` | The background group you compare against, one of the mission's `strata` |
 | `rationale` | Why this threshold and this stratum. If you copied them from an earlier run, say so |
 | `failure_interpretation` | What it means if the claim is rejected, and which changes you will not make to rescue it |
 | `alternative_explanations` | Reasons the claim could come out supported while being wrong. See below |
 | `seen_before_lock` | Everything you had read or been told about results before locking. "Nothing" is a valid answer only if true |
 | `ai_budget` | The person's limit, in their words. Already filled in by `ultra init` |
 | `data.seed` | Any integer, picked without looking at data: a random number is best. It decides which weeks of the archive your run samples. Avoid seeds already used: those in `contributions/*/plan.json`, and 20261123 from the mission README |
-| `data.weeks`, `data.per_class` | How many random weeks, and how many objects per class and week. The default, 6 and 2, asks for 12 objects per class. Below 10 objects in your primary stratum the rule gives no verdict |
-| `data.max_requests` | The most network requests this run may make, over all attempts. At most 23 + weeks x 5 x (1 + per_class) are needed; `ultra lock` refuses a plan that cannot fit |
+| the other `data` fields | How much to sample: `weeks` and `per_class`, or `patches` and `per_stratum`, depending on the mission. The defaults are a small run. Below 10 objects on either side of the comparison the rule gives no verdict |
+| `data.max_requests` | The most network requests this run may make, over all attempts. `ultra lock` refuses a plan that cannot fit and says how many it needs |
 
 The rule is applied by the program to the difference in pass rates, positives minus background: `supported` if its 95% interval lies above zero, `rejected` if the interval lies below zero, `undecided` if it contains zero or either side has fewer than 10 objects. Seeing no difference is `undecided`, not `rejected`. You do not get to choose the verdict.
 

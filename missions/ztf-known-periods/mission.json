@@ -1,0 +1,19 @@
+{
+  "id": "ztf-known-periods",
+  "kind": "periods",
+  "title": "Re-find the catalogued periods of known variable stars in ZTF light curves",
+  "question": "With ZTF's public light curves and a plain period search, for what share of variable stars that were catalogued without ZTF is the catalogued period found, and how often does the same search flag a star that no catalogue lists as variable?",
+  "ground_truth": "ground_truth.tsv",
+  "ground_truth_source": "The AAVSO International Variable Star Index (VSX), queried per run; entries numbered above vsx_max_oid are ignored",
+  "positive_groups": ["catalogued, found elsewhere"],
+  "strata": ["not catalogued"],
+  "data_source": "the IRSA ZTF light-curve service and the AAVSO VSX",
+  "data_source_id": "irsa",
+  "seconds_per_request": 12,
+  "plan_defaults": {"patches": 8, "per_stratum": 2, "max_requests": 60},
+  "threshold_range": [2, 20],
+  "light_curves_until": "2026-01-01",
+  "vsx_max_oid": 10800000,
+  "patch_radius_deg": 0.3,
+  "background_radius_deg": 0.01
+}

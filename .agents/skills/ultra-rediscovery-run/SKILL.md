@@ -1,13 +1,15 @@
 ---
 name: ultra-rediscovery-run
-description: Carry out one ultrastronomy run from start to shared record - re-find known astronomical objects in public ZTF alert data with a fixed screen, measure how much of the alert stream passes the same screen, and record it so others can check it. Use when a person asks to take part in ultrastronomy, to run a mission, to spend spare AI usage on astronomy, or to replicate a rediscovery result. Start here before any other ultrastronomy skill.
+description: Carry out one ultrastronomy run from start to shared record - re-find known astronomical objects in public ZTF data with a fixed search, measure how much of everything else the same search flags, and record it so others can check it. Use when a person asks to take part in ultrastronomy, to run a mission, to spend spare AI usage on astronomy, or to replicate a rediscovery result. Start here before any other ultrastronomy skill.
 license: Apache-2.0
-compatibility: Requires Python 3.11+, uv, and network access to api.ztf.fink-portal.org for real runs. The demo runs offline.
+compatibility: Requires Python 3.11+, uv, and network access to the mission's data services (api.ztf.fink-portal.org, or irsa.ipac.caltech.edu and vsx.aavso.org) for real runs. The demo runs offline.
 ---
 
 # ultra-rediscovery-run
 
-One run answers one question: with this fixed screen, what share of the known objects pass, and what share of everything else passes too? A run does not look for anything new.
+One run answers one question: with this fixed search, what share of the known objects are found, and what share of everything else is flagged too? A run does not look for anything new.
+
+The steps are the same for every mission. What differs is in `missions/<mission>/README.md`: read it before step 2.
 
 ## When to use
 
@@ -24,7 +26,7 @@ Run every command from the repository root. `ultra status runs/<name>` tells you
 
 | Step | Command | What you do |
 |---|---|---|
-| 1 | `uv run ultra init <name> --ai-budget "<their words>"` | Pick a short name, such as `2026-11-23-alice` |
+| 1 | `uv run ultra init <name> --mission <mission> --ai-budget "<their words>"` | Pick a short name, such as `2026-11-23-alice` |
 | 2 | edit `runs/<name>/plan.json` | Follow the `ultra-plan` skill. Choose your own `data.seed` |
 | 3 | `uv run ultra lock runs/<name>` | After this the plan, the code and the mission files cannot change |
 | 4 | `uv run ultra fetch runs/<name>` | Shows the request count. Tell the person the number, then add `--confirm`. If they gave their go-ahead in advance, tell them and go on |
@@ -35,9 +37,9 @@ Run every command from the repository root. `ultra status runs/<name>` tells you
 
 Stop after step 8. Committing the record and opening a pull request publish it under the person's name: ask them first.
 
-Read `ultra-alert-photometry` before you interpret any number in step 5 or write step 6.
+Read the mission's reading skill before you interpret any number in step 5 or write step 6: `ultra-periods` for `ztf-known-periods`, `ultra-alert-photometry` for `ztf-nuclear-transients`.
 
-After step 4, look at the counts per stratum that `fetch` prints. Fewer objects than asked for means some weeks returned nothing for that class. That is a fact about the sample, to be reported, not an error to retry.
+After step 4, look at the counts per group that `fetch` prints. Fewer objects than asked for means some weeks or patches had too few such objects. That is a fact about the sample, to be reported, not an error to retry.
 
 ## What success looks like
 
@@ -61,7 +63,7 @@ After step 4, look at the counts per stratum that `fetch` prints. Fewer objects 
 
 ```sh
 uv run ultra demo
-uv run ultra init 2026-11-23-alice --ai-budget "30 minutes, stop after the gates"
+uv run ultra init 2026-11-23-alice --mission ztf-known-periods --ai-budget "30 minutes, stop after the gates"
 # edit runs/2026-11-23-alice/plan.json
 uv run ultra lock runs/2026-11-23-alice
 uv run ultra fetch runs/2026-11-23-alice --confirm

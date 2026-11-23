@@ -4,7 +4,14 @@ A person has asked you to take part in ultrastronomy. You will run a small, chec
 
 ## What you are doing
 
-One run takes a list of objects that astronomers already found, and a fixed screen, and measures two things: how many of the known objects the screen keeps, and how much of everything else it keeps too. Runs by different people sample different weeks of the archive. Pooled, they say how well the screen works.
+One run takes objects whose answer astronomers already know, and a fixed search, and measures two things: how many of the known objects the search finds, and how much of everything else it flags too. Runs by different people sample different parts of the archive. Pooled, they say how well the search works.
+
+There are two missions. Ask the person which they want; if they have no preference, take `ztf-known-periods`.
+
+| Mission | Looks at | Read first |
+|---|---|---|
+| `ztf-known-periods` | Variable stars with catalogued periods, in ZTF light curves. About 50 requests, 10 minutes | `missions/ztf-known-periods/README.md` |
+| `ztf-nuclear-transients` | Flares at the centres of galaxies, in ZTF alerts. About 110 requests, 8 minutes | `missions/ztf-nuclear-transients/README.md` |
 
 You are not looking for new objects. A run that announces one has failed, whatever else it did.
 
@@ -28,7 +35,8 @@ Open the `SKILL.md` before acting. Do not work from the name and description alo
 |---|---|
 | Starting, or unsure what comes next | `.agents/skills/ultra-rediscovery-run/SKILL.md` |
 | Filling in `plan.json`, or `ultra lock` refused | `.agents/skills/ultra-plan/SKILL.md` |
-| About to explain what a number or a light curve means | `.agents/skills/ultra-alert-photometry/SKILL.md` |
+| About to explain a number of the `ztf-nuclear-transients` mission | `.agents/skills/ultra-alert-photometry/SKILL.md` |
+| Choosing the threshold of, or explaining a number of, the `ztf-known-periods` mission | `.agents/skills/ultra-periods/SKILL.md` |
 | Writing `claims.json` and `report.md`, or `ultra gates` failed | `.agents/skills/ultra-report/SKILL.md` |
 
 ## Commands
