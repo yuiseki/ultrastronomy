@@ -18,8 +18,7 @@ import re
 import unicodedata
 from pathlib import Path
 
-from . import fink
-from . import mission as M
+from .pipelines import pipeline
 from .run import changed_since_lock, file_sha256, parse_time, read_json
 
 CLAIM_KINDS = {"inferred", "unverified"}
@@ -57,38 +56,6 @@ def report_sections(text: str) -> list[tuple[str, str]]:
     return out
 
 
-def expected_sample(plan: dict, mission: dict, cache: Path | None) -> list[tuple]:
-    """(object, role, label, week) for every object the locked plan selects.
-
-    This repeats the selection of `mission.fetch_fink` from the plan, the
-    mission and the cached week listings, without reading provenance.json.
-    A test keeps the two in step.
-    """
-    import datetime as dt
-    import hashlib
-    import random
-    from . import synth
-    d = plan["data"]
-    if d["source"] == "synthetic":
-        _, truth, background = synth.demo_population(d["seed"])
-        return ([(t["ztf_id"], "truth", t["group"], "") for t in truth] +
-                [(b["ztf_id"], "background", b["stratum"], "") for b in background])
-    if cache is None:
-        raise FileNotFoundError("no cache")
-    rng = random.Random(d["seed"])
-    truth_ids = {t["ztf_id"] for t in mission["truth"]}
-    out = [(t["ztf_id"], "truth", t["group"], "") for t in mission["truth"]]
-    for week in M.sample_weeks(d["seed"], d["weeks"], mission["first_date"], mission["last_date"]):
-        stop = (dt.date.fromisoformat(week) + dt.timedelta(days=7)).isoformat()
-        for stratum in mission["strata"]:
-            key = hashlib.sha256(f"{stratum}|{week}|{stop}|3000".encode()).hexdigest()[:16]
-            entry = read_json(cache / "weeks" / f"{key}.json")
-            taken = {o[0] for o in out}
-            ids = [i for i in entry["ids"] if i not in truth_ids and i not in taken]
-            out += [(oid, "background", stratum, week) for oid in rng.sample(ids, min(d["per_class"], len(ids)))]
-    return out
-
-
 def _gate(name, passed, detail=""):
     return {"gate": name, "passed": bool(passed), "detail": "" if passed else detail}
 
@@ -99,6 +66,7 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
         if not (run / name).exists():
             return [_gate("plan_locked", False, f"{name} is missing")]
     plan, lock = read_json(run / "plan.json"), read_json(run / "plan.lock")
+    P = pipeline(mission)
     events = [json.loads(line) for line in (run / "log.jsonl").read_text(encoding="utf-8").splitlines()]
 
     # 1. The plan is the one that was locked.
@@ -134,7 +102,7 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
 
     # 5. The data is here, matches its recorded hashes, and holds only allow-listed columns.
     try:
-        objects = M.load_objects(plan, provenance, cache or Path("/nonexistent"))
+        objects = P.load_objects(plan, provenance, cache or Path("/nonexistent"))
     except FileNotFoundError:
         gates.append(_gate("data_matches_provenance", False,
                            "the data is not on this machine, so nothing below could be recomputed. "
@@ -144,13 +112,13 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
         gates.append(_gate("data_matches_provenance", False, str(e)))
         return gates
     gates.append(_gate("data_matches_provenance", True))
-    extra = sorted({k for rows in objects.values() for r in rows for k in r} - set(fink.COLUMNS))
+    extra = P.leaky_columns(objects)
     gates.append(_gate("no_leaky_columns", not extra, f"columns outside the allow-list in the data: {extra}"))
 
     # 6. The objects, their roles and their labels are the ones the locked plan
     #    gives. provenance.json is not trusted: the sample is derived again.
     try:
-        expected = expected_sample(plan, mission, cache)
+        expected = P.expected_sample(plan, mission, cache)
     except FileNotFoundError:
         gates.append(_gate("sample_matches_plan", False,
                            "the sampled weeks are not on this machine, so the sample could not be derived again. "
@@ -168,13 +136,13 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
     gates.append(_gate("sample_matches_plan", not problems, "; ".join(problems)))
 
     # 7. Recomputing from the data and the locked plan gives exactly the stored results.
-    again = M.compute(objects, provenance, plan, mission, with_injection=True)
+    again = P.compute(objects, provenance, plan, mission)
     differing = sorted(k for k in set(again) | set(results) if again.get(k) != results.get(k))
     gates.append(_gate("results_recomputed", not differing,
                        f"results.json differs from a recomputation in: {differing}. Run `ultra evaluate` again; do not edit it"))
 
     # 8. The Measured section, and measured.md itself, are the program's text, unchanged.
-    measured = M.measured_markdown(again).strip()
+    measured = P.measured_markdown(again).strip()
     report = (run / "report.md").read_text(encoding="utf-8") if (run / "report.md").exists() else ""
     sections = report_sections(report)
     headings = [h for h, _ in sections]

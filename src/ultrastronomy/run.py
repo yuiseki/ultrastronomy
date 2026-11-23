@@ -90,7 +90,8 @@ def new_plan(mission: dict, ai_budget: str, source: str = "fink") -> dict:
         "alternative_explanations": [],
         "seen_before_lock": "",
         "ai_budget": ai_budget,
-        "data": {"source": source, "seed": None, "weeks": 6, "per_class": 2, "max_requests": 130},
+        "data": {"source": source, "seed": None,
+                 **mission.get("plan_defaults", {"weeks": 6, "per_class": 2, "max_requests": 130})},
     }
 
 
@@ -99,8 +100,9 @@ def plan_problems(plan: dict, mission: dict) -> list[str]:
     problems = [f"`{key}` is empty" for key in REQUIRED_TEXT if not str(plan.get(key, "")).strip()]
     rule = plan.get("decision_rule", {})
     threshold = rule.get("threshold")
-    if not isinstance(threshold, int) or isinstance(threshold, bool) or not 1 <= threshold <= len(score.CRITERIA):
-        problems.append(f"`decision_rule.threshold` must be an integer from 1 to {len(score.CRITERIA)}")
+    lo, hi = mission.get("threshold_range", [1, len(score.CRITERIA)])
+    if not isinstance(threshold, int) or isinstance(threshold, bool) or not lo <= threshold <= hi:
+        problems.append(f"`decision_rule.threshold` must be an integer from {lo} to {hi}")
     if rule.get("primary_stratum") not in mission["strata"]:
         problems.append(f"`decision_rule.primary_stratum` must be one of {mission['strata']}")
     if not plan.get("alternative_explanations"):
@@ -108,7 +110,7 @@ def plan_problems(plan: dict, mission: dict) -> list[str]:
     data = plan.get("data", {})
     if not isinstance(data.get("seed"), int) or isinstance(data.get("seed"), bool):
         problems.append("`data.seed` must be an integer you choose")
-    for key in ("weeks", "per_class", "max_requests"):
+    for key in mission.get("plan_defaults", {"weeks": 6, "per_class": 2, "max_requests": 130}):
         if not isinstance(data.get(key), int) or data.get(key) < 1:
             problems.append(f"`data.{key}` must be a positive integer")
     return problems

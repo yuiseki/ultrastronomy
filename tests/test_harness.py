@@ -410,7 +410,7 @@ def test_an_object_named_in_an_inferred_claim_is_caught(demo):
 
 def test_the_gate_derives_the_same_sample_as_the_fetch(tmp_path, monkeypatch):
     """`gates.expected_sample` repeats the selection in `mission.fetch_fink`. Keep them in step."""
-    from ultrastronomy.gates import expected_sample
+    from ultrastronomy.pipelines import Screen
     mission = M.load_mission("ztf-nuclear-transients")
     plan = new_plan(mission, "x")
     plan["data"].update({"seed": 42, "weeks": 2, "per_class": 2, "max_requests": 200})
@@ -428,7 +428,7 @@ def test_the_gate_derives_the_same_sample_as_the_fetch(tmp_path, monkeypatch):
     run.mkdir()
     provenance = M.fetch_fink(run, plan, mission, tmp_path / "cache", fink.Budget(200))
     fetched = sorted((p["object_id"], p["role"], p["label"], p["week"]) for p in provenance)
-    assert fetched == sorted(expected_sample(plan, mission, tmp_path / "cache"))
+    assert fetched == sorted(Screen().expected_sample(plan, mission, tmp_path / "cache"))
     assert len(fetched) == 23 + 2 * 5 * 2
 
 

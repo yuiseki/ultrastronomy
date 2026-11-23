@@ -7,12 +7,12 @@ import json
 import os
 import shutil
 import sys
-from collections import Counter
 from pathlib import Path
 
 from . import fink
 from . import mission as M
 from .gates import run_gates
+from .pipelines import pipeline
 from .intervals import wilson
 from .run import lock, log, new_plan, plan_problems, read_json, require_lock, write_json
 
@@ -20,8 +20,9 @@ SHARED = ["plan.json", "plan.lock", "log.jsonl", "provenance.json", "results.jso
           "claims.json", "report.md"]
 
 
-def cache_dir() -> Path:
-    return Path(os.environ.get("ULTRA_CACHE", ".cache/fink"))
+def cache_dir(mission: dict | None = None) -> Path:
+    name = pipeline(mission).cache_name if mission else "fink"
+    return Path(os.environ.get("ULTRA_CACHE", f".cache/{name}"))
 
 
 def _mission_of(run: Path) -> dict:
@@ -50,7 +51,7 @@ def cmd_init(a) -> int:
         return 1
     mission = M.load_mission(a.mission)
     run.mkdir(parents=True)
-    write_json(run / "plan.json", new_plan(mission, a.ai_budget))
+    write_json(run / "plan.json", new_plan(mission, a.ai_budget, mission.get("data_source_id", "fink")))
     log(run, "init", mission=a.mission)
     print(f"created {run}/plan.json. Fill it in, then run `ultra lock {run}`.")
     return 0
@@ -61,8 +62,8 @@ def cmd_lock(a) -> int:
     mission = _mission_of(run)
     plan = read_json(run / "plan.json")
     try:
-        if not plan_problems(plan, mission) and plan["data"]["source"] == "fink":
-            needed = M.planned_requests(plan, mission)
+        if not plan_problems(plan, mission) and plan["data"]["source"] != "synthetic":
+            needed = pipeline(mission).planned_requests(plan, mission)
             if needed > plan["data"]["max_requests"]:
                 raise ValueError(f"this plan can need {needed} requests but `data.max_requests` is "
                                  f"{plan['data']['max_requests']}. Raise the budget or sample less.")
@@ -89,9 +90,10 @@ def cmd_fetch(a) -> int:
         write_json(run / "provenance.json", M.fetch_synthetic(plan)[0])
         log(run, "fetch", requests_used=0)
         return 0
-    planned, spent = M.planned_requests(plan, mission), M.requests_spent(run)
+    P = pipeline(mission)
+    planned, spent = P.planned_requests(plan, mission), M.requests_spent(run)
     left = plan["data"]["max_requests"] - spent
-    print(f"this plan needs at most {planned} requests to the Fink API (about {planned * 4 // 60 + 1} minutes). "
+    print(f"this plan needs at most {planned} requests to {mission['data_source']} (about {planned * mission.get('seconds_per_request', 4) // 60 + 1} minutes). "
           f"Budget: {plan['data']['max_requests']}, already used by this run: {spent}, left: {max(left, 0)}. "
           "Cached objects cost nothing.")
     if not a.confirm:
@@ -99,21 +101,16 @@ def cmd_fetch(a) -> int:
         return 0
     budget = fink.Budget(max(left, 0))
     try:
-        provenance = M.fetch_fink(run, plan, mission, cache_dir(), budget)
+        provenance = P.fetch(run, plan, mission, cache_dir(mission), budget)
     except Exception as e:  # network errors and the budget: record, never paper over
         log(run, "fetch_failed", error=f"{type(e).__name__}: {e}", requests_used=budget.used)
         print(f"fetch failed after {budget.used} requests: {type(e).__name__}: {e}", file=sys.stderr)
         return 1
     write_json(run / "provenance.json", provenance)
     log(run, "fetch", requests_used=budget.used, objects=len(provenance))
-    got = Counter(p["label"] for p in provenance if p["role"] == "background")
-    want = plan["data"]["weeks"] * plan["data"]["per_class"]
-    print(f"fetched {len(provenance)} objects with {budget.used} requests. Background objects per stratum (asked for {want}):")
-    for stratum in mission["strata"]:
-        note = "" if got[stratum] == want else "   <- fewer than asked: some weeks returned nothing for this class"
-        print(f"  {stratum}: {got[stratum]}{note}")
-    print("An empty week is usually a week without observations, or a class label Fink no longer uses. "
-          f"The weeks are in {run}/log.jsonl.\nNext: `ultra evaluate {run}`.")
+    print(f"fetched {len(provenance)} objects with {budget.used} requests.")
+    print(P.fetch_summary(plan, mission, provenance))
+    print(f"The sampling steps are in {run}/log.jsonl.\nNext: `ultra evaluate {run}`.")
     return 0
 
 
@@ -124,16 +121,20 @@ def cmd_evaluate(a) -> int:
         require_lock(run, mission)
         plan = read_json(run / "plan.json")
         provenance = read_json(run / "provenance.json")
-        objects = M.load_objects(plan, provenance, cache_dir())
+        P = pipeline(mission)
+        objects = P.load_objects(plan, provenance, cache_dir(mission))
     except (ValueError, FileNotFoundError) as e:
         log(run, "evaluate_failed", error=str(e))
         print(e, file=sys.stderr)
         return 1
-    results = M.compute(objects, provenance, plan, mission, with_injection=True)
+    results = P.compute(objects, provenance, plan, mission)
     write_json(run / "results.json", results)
-    (run / "measured.md").write_text(M.measured_markdown(results), encoding="utf-8")
+    (run / "measured.md").write_text(P.measured_markdown(results), encoding="utf-8")
     log(run, "evaluate", verdict=results["decision"]["verdict"])
-    print_results(results)
+    if "recall_vs_load" in results:
+        print_results(results)
+    else:
+        print(P.measured_markdown(results))
     print(f"The sentences above are in {run}/measured.md. Next: write claims.json and report.md.")
     return 0
 
@@ -146,7 +147,8 @@ def _print_gates(gates) -> int:
 
 def cmd_gates(a) -> int:
     run = Path(a.run)
-    gates = run_gates(run, _mission_of(run), cache_dir())
+    mission = _mission_of(run)
+    gates = run_gates(run, mission, cache_dir(mission))
     log(run, "gates", failed=[g["gate"] for g in gates if not g["passed"]])
     return _print_gates(gates)
 
@@ -155,26 +157,20 @@ def cmd_verify(a) -> int:
     """Check someone else's record, with data fetched again by this machine."""
     record = Path(a.record)
     mission = _mission_of(record)
-    cache = cache_dir()
+    cache = cache_dir(mission)
     if a.refetch:
-        import datetime as dt
         plan = read_json(record / "plan.json")
         provenance = read_json(record / "provenance.json")
+        P = pipeline(mission)
         cache = Path(".cache/verify") / record.name
-        weeks = M.sample_weeks(plan["data"]["seed"], plan["data"]["weeks"], mission["first_date"], mission["last_date"])
-        most = len(provenance) + len(weeks) * len(mission["strata"])
-        print(f"re-fetching {len(weeks)} sampled weeks and {len(provenance)} objects into {cache} (at most {most} requests).")
+        most = P.refetch_count(plan, mission, provenance)
+        print(f"re-fetching what the plan of {record.name} selects into {cache} (at most {most} requests).")
         if not a.confirm:
             print("nothing was fetched. Re-run with --confirm to go ahead.")
             return 0
         budget = fink.Budget(most)
         try:
-            for week in weeks:
-                stop = (dt.date.fromisoformat(week) + dt.timedelta(days=7)).isoformat()
-                for stratum in mission["strata"]:
-                    fink.class_week(stratum, week, stop, cache, budget)
-            for p in provenance:
-                fink.object_alerts(p["object_id"], cache, budget, mission["alerts_until"])
+            P.refetch(plan, mission, provenance, cache, budget)
         except Exception as e:  # a failed download is not a failed record: say so and stop
             print(f"re-fetch failed after {budget.used} requests: {type(e).__name__}: {e}\n"
                   "The record was not checked. What was downloaded is cached; run the command again.", file=sys.stderr)
@@ -211,13 +207,13 @@ def cmd_status(a) -> int:
     if missing:
         print(f"next: write {' and '.join(missing)} in {run}/ (see the ultra-report skill)")
         return 0
-    failed = [g["gate"] for g in run_gates(run, mission, cache_dir()) if not g["passed"]]
+    failed = [g["gate"] for g in run_gates(run, mission, cache_dir(mission)) if not g["passed"]]
     if failed:
         print(f"next: fix what the gates name  ->  ultra gates {run}   (failing: {', '.join(failed)})")
         return 0
     print("done: the record passes every gate")
     exported = Path(a.contributions_dir) / run.name
-    if plan["data"]["source"] != "fink":
+    if plan["data"]["source"] == "synthetic":
         print("this is a synthetic run: a demo, not a contribution. Nothing more to do.")
     elif not exported.exists():
         print(f"next: copy the record for sharing  ->  ultra export {run}")
@@ -229,10 +225,11 @@ def cmd_status(a) -> int:
 def cmd_export(a) -> int:
     run = Path(a.run)
     plan = read_json(run / "plan.json")
-    if plan["data"]["source"] != "fink":
+    if plan["data"]["source"] == "synthetic":
         print("not exported: a synthetic run is a demo, not a contribution", file=sys.stderr)
         return 1
-    failed = [g["gate"] for g in run_gates(run, _mission_of(run), cache_dir()) if not g["passed"]]
+    mission = _mission_of(run)
+    failed = [g["gate"] for g in run_gates(run, mission, cache_dir(mission)) if not g["passed"]]
     if failed:
         print(f"not exported: gates failed: {failed}", file=sys.stderr)
         return 1
