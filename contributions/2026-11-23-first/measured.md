@@ -1,0 +1,13 @@
+- Data: ZTF alert photometry from the Fink API.
+- Locked rule: score of 5 or more; positives against the `Unknown` stratum.
+- Positives passing: 14 of 19. `Unknown` objects passing: 0 of 12.
+- Difference in pass rates: +0.737, 95% interval +0.406 to +0.882.
+- Verdict: supported.
+- All known objects passing at that score, supernova candidates included: 14 of 23.
+- `(SIMBAD) Galaxy` objects passing at that score: 0 of 6.
+- `(SIMBAD) QSO` objects passing at that score: 4 of 12.
+- `(SIMBAD) Seyfert_1` objects passing at that score: 4 of 12.
+- `SN candidate` objects passing at that score: 1 of 12.
+- `Unknown` objects passing at that score: 0 of 12.
+- Background objects scored: 54. Of these, 23 had no positive detection and score 0.
+- Synthetic flares passing at that score, by peak magnitude, under a model cadence (each band observed on a third of nights during a 240-day season, 30% of visits lost to weather, limiting magnitude 20.5 with 0.3 mag scatter): 17.0: 100 of 100, 17.5: 100 of 100, 18.0: 99 of 100, 18.5: 94 of 100, 19.0: 80 of 100, 19.5: 55 of 100, 20.0: 15 of 100, 20.5: 0 of 100.

@@ -1,0 +1,35 @@
+{"at": "2026-11-23T11:13:07Z", "event": "init", "mission": "ztf-nuclear-transients"}
+{"at": "2026-11-23T11:13:08Z", "event": "lock", "plan_sha256": "fd576010ec7dad3a5ce22cb108f45d5d373f782edef8392c7bae90c7d89fcb03", "code_sha256": {"__init__.py": "4d4d19f5ff02fbe5ecfb9ec08fc40668ca110ed8938d99036d1c90622a3d6e01", "cli.py": "02d88dea4e566cd2128e9634c2b7b2e5d1a177dbdf4e36cacefec4a79ecb216d", "fink.py": "8d1d9fa2d6a0013030112c9f84b08f6db8dae41c18d3b9957377d119d3587f7a", "gates.py": "1eba5d6c2527a80820db695e22e8dff92a4687f70e03c834ade4e9df5e3e2071", "intervals.py": "e98a412785788b483f7343c6f9dde9193340108d40e60e12354bc737ec4ee3c0", "lightcurve.py": "13ba629620556dfb7060178c8e61caa4abd9248e032cd76f0511e8fcd2326568", "mission.py": "25fc510d79399988390596ad424c0ea1f57378ce7027aa4385695f66902a2e28", "run.py": "6f905154224ab0549ebbef3791e8c3f168760abcea486db8c8b3533a384a6fbb", "score.py": "f681ef75d6133e59f3a33c6596cd3866ed43066b57d3f3f322d90220d499458a", "synth.py": "a0e474af4536e1c62ccfd2a0958840ebaa7bb46551f68708134819bffe3adcb1", "mission/ground_truth.tsv": "0bf32c8782b50384fc0d470dab6214bd6fe112fba15176c27e7d221979db39fa", "mission/mission.json": "f01042d4072bf0b9f5cb30979e1e6bdaa658dac5d214664ee08b2bb125408a6e"}, "git_commit": "6d27e00382addcf2c088cd699177fd15bd333956", "locked_at": "2026-11-23T11:13:08Z"}
+{"at": "2026-11-23T11:14:03Z", "event": "sample", "week": "2020-07-27", "stratum": "Unknown", "available": 2934, "picked": ["ZTF20abexant", "ZTF18abjretq"]}
+{"at": "2026-11-23T11:14:10Z", "event": "sample", "week": "2020-07-27", "stratum": "SN candidate", "available": 1826, "picked": ["ZTF20abkifth", "ZTF20abmxstg"]}
+{"at": "2026-11-23T11:14:14Z", "event": "sample", "week": "2020-07-27", "stratum": "(SIMBAD) Galaxy", "available": 241, "picked": ["ZTF18abqncbx", "ZTF19aaqfrhs"]}
+{"at": "2026-11-23T11:14:33Z", "event": "sample", "week": "2020-07-27", "stratum": "(SIMBAD) QSO", "available": 1820, "picked": ["ZTF19aasaywo", "ZTF18abqvcre"]}
+{"at": "2026-11-23T11:14:39Z", "event": "sample", "week": "2020-07-27", "stratum": "(SIMBAD) Seyfert_1", "available": 519, "picked": ["ZTF18aaqlukq", "ZTF18aaimjms"]}
+{"at": "2026-11-23T11:14:54Z", "event": "sample", "week": "2021-06-19", "stratum": "Unknown", "available": 1576, "picked": ["ZTF19aaepqpi", "ZTF18acgphng"]}
+{"at": "2026-11-23T11:15:05Z", "event": "sample", "week": "2021-06-19", "stratum": "SN candidate", "available": 2463, "picked": ["ZTF21abavqaz", "ZTF21abgsmsu"]}
+{"at": "2026-11-23T11:15:08Z", "event": "sample", "week": "2021-06-19", "stratum": "(SIMBAD) Galaxy", "available": 456, "picked": ["ZTF19abffmew", "ZTF21abhiokv"]}
+{"at": "2026-11-23T11:15:16Z", "event": "sample", "week": "2021-06-19", "stratum": "(SIMBAD) QSO", "available": 2065, "picked": ["ZTF18aautpwv", "ZTF18aaxvcxs"]}
+{"at": "2026-11-23T11:15:23Z", "event": "sample", "week": "2021-06-19", "stratum": "(SIMBAD) Seyfert_1", "available": 943, "picked": ["ZTF18aahzzvi", "ZTF19aacqijv"]}
+{"at": "2026-11-23T11:15:32Z", "event": "sample", "week": "2022-06-05", "stratum": "Unknown", "available": 1858, "picked": ["ZTF18abotqxh", "ZTF18abjrfbm"]}
+{"at": "2026-11-23T11:15:41Z", "event": "sample", "week": "2022-06-05", "stratum": "SN candidate", "available": 2300, "picked": ["ZTF22aananeo", "ZTF22aaoathx"]}
+{"at": "2026-11-23T11:15:44Z", "event": "sample", "week": "2022-06-05", "stratum": "(SIMBAD) Galaxy", "available": 633, "picked": ["ZTF18aawzwnq", "ZTF22aancuhh"]}
+{"at": "2026-11-23T11:15:51Z", "event": "sample", "week": "2022-06-05", "stratum": "(SIMBAD) QSO", "available": 2315, "picked": ["ZTF18ablmosq", "ZTF19aasbuev"]}
+{"at": "2026-11-23T11:15:58Z", "event": "sample", "week": "2022-06-05", "stratum": "(SIMBAD) Seyfert_1", "available": 1287, "picked": ["ZTF18aamsjiq", "ZTF19aasbyqr"]}
+{"at": "2026-11-23T11:16:12Z", "event": "sample", "week": "2022-11-30", "stratum": "Unknown", "available": 2965, "picked": ["ZTF22abygzlh", "ZTF19acvedkl"]}
+{"at": "2026-11-23T11:16:16Z", "event": "sample", "week": "2022-11-30", "stratum": "SN candidate", "available": 905, "picked": ["ZTF22abxyoaz", "ZTF22abvjubi"]}
+{"at": "2026-11-23T11:16:18Z", "event": "sample", "week": "2022-11-30", "stratum": "(SIMBAD) Galaxy", "available": 0, "picked": []}
+{"at": "2026-11-23T11:16:37Z", "event": "sample", "week": "2022-11-30", "stratum": "(SIMBAD) QSO", "available": 2829, "picked": ["ZTF18aaehcbj", "ZTF18abxbjuw"]}
+{"at": "2026-11-23T11:16:40Z", "event": "sample", "week": "2022-11-30", "stratum": "(SIMBAD) Seyfert_1", "available": 1016, "picked": ["ZTF18acevggt", "ZTF21abrptgf"]}
+{"at": "2026-11-23T11:16:48Z", "event": "sample", "week": "2023-08-19", "stratum": "Unknown", "available": 2255, "picked": ["ZTF19abpttix", "ZTF19aciflra"]}
+{"at": "2026-11-23T11:16:54Z", "event": "sample", "week": "2023-08-19", "stratum": "SN candidate", "available": 633, "picked": ["ZTF23aazbqaw", "ZTF23aaubptx"]}
+{"at": "2026-11-23T11:16:56Z", "event": "sample", "week": "2023-08-19", "stratum": "(SIMBAD) Galaxy", "available": 0, "picked": []}
+{"at": "2026-11-23T11:17:05Z", "event": "sample", "week": "2023-08-19", "stratum": "(SIMBAD) QSO", "available": 2106, "picked": ["ZTF19aafkzis", "ZTF19aabkzyo"]}
+{"at": "2026-11-23T11:17:09Z", "event": "sample", "week": "2023-08-19", "stratum": "(SIMBAD) Seyfert_1", "available": 551, "picked": ["ZTF19aaxdibd", "ZTF18aaogtwf"]}
+{"at": "2026-11-23T11:17:16Z", "event": "sample", "week": "2024-03-29", "stratum": "Unknown", "available": 2765, "picked": ["ZTF21aasscnf", "ZTF18abrztfs"]}
+{"at": "2026-11-23T11:17:19Z", "event": "sample", "week": "2024-03-29", "stratum": "SN candidate", "available": 675, "picked": ["ZTF24aahihcl", "ZTF24aahefwy"]}
+{"at": "2026-11-23T11:17:21Z", "event": "sample", "week": "2024-03-29", "stratum": "(SIMBAD) Galaxy", "available": 0, "picked": []}
+{"at": "2026-11-23T11:17:27Z", "event": "sample", "week": "2024-03-29", "stratum": "(SIMBAD) QSO", "available": 2588, "picked": ["ZTF19aakjfay", "ZTF18adlrdlv"]}
+{"at": "2026-11-23T11:17:36Z", "event": "sample", "week": "2024-03-29", "stratum": "(SIMBAD) Seyfert_1", "available": 2017, "picked": ["ZTF18aaudipu", "ZTF19aaomkbg"]}
+{"at": "2026-11-23T11:22:38Z", "event": "fetch", "requests_used": 107, "objects": 77}
+{"at": "2026-11-23T11:22:39Z", "event": "evaluate", "verdict": "supported"}
+{"at": "2026-11-23T11:23:09Z", "event": "gates", "failed": []}

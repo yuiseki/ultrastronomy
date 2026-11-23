@@ -1,0 +1,1390 @@
+{
+  "data_source": "fink",
+  "columns_used": [
+    "i:distpsnr1",
+    "i:fid",
+    "i:isdiffpos",
+    "i:jd",
+    "i:magpsf",
+    "i:sgscore1"
+  ],
+  "objects": [
+    {
+      "id": "ZTF18aaehcbj",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 4,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 370
+    },
+    {
+      "id": "ZTF18aahzzvi",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF18aaimjms",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 2,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 29
+    },
+    {
+      "id": "ZTF18aamsjiq",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF18aaogtwf",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF18aaqlukq",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 6,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 443
+    },
+    {
+      "id": "ZTF18aasvknh",
+      "role": "truth",
+      "label": "tde",
+      "score": 5,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 21
+    },
+    {
+      "id": "ZTF18aaudipu",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF18aautpwv",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 5,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 148
+    },
+    {
+      "id": "ZTF18aawzwnq",
+      "role": "background",
+      "label": "(SIMBAD) Galaxy",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF18aaxvcxs",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF18abjretq",
+      "role": "background",
+      "label": "Unknown",
+      "score": 3,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 22
+    },
+    {
+      "id": "ZTF18abjrfbm",
+      "role": "background",
+      "label": "Unknown",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF18ablmosq",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF18abotqxh",
+      "role": "background",
+      "label": "Unknown",
+      "score": 3,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 14
+    },
+    {
+      "id": "ZTF18abqncbx",
+      "role": "background",
+      "label": "(SIMBAD) Galaxy",
+      "score": 4,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 961
+    },
+    {
+      "id": "ZTF18abqvcre",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF18abrztfs",
+      "role": "background",
+      "label": "Unknown",
+      "score": 3,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 17
+    },
+    {
+      "id": "ZTF18abxbjuw",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 4,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 195
+    },
+    {
+      "id": "ZTF18acevggt",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 5,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 182
+    },
+    {
+      "id": "ZTF18acfhomp",
+      "role": "truth",
+      "label": "tde",
+      "score": 5,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 52
+    },
+    {
+      "id": "ZTF18acgphng",
+      "role": "background",
+      "label": "Unknown",
+      "score": 1,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": false,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": false
+      },
+      "no_positive_detection": false,
+      "n_det": 6
+    },
+    {
+      "id": "ZTF18adlrdlv",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 5,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 121
+    },
+    {
+      "id": "ZTF19aabkzyo",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 3,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 45
+    },
+    {
+      "id": "ZTF19aacqijv",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 4,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 154
+    },
+    {
+      "id": "ZTF19aaepqpi",
+      "role": "background",
+      "label": "Unknown",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF19aafkzis",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF19aafmytc",
+      "role": "truth",
+      "label": "sn",
+      "score": 4,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 21
+    },
+    {
+      "id": "ZTF19aakjfay",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF19aaomkbg",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 5,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 651
+    },
+    {
+      "id": "ZTF19aaqfrhs",
+      "role": "background",
+      "label": "(SIMBAD) Galaxy",
+      "score": 2,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": false
+      },
+      "no_positive_detection": false,
+      "n_det": 1
+    },
+    {
+      "id": "ZTF19aasaywo",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 5,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 112
+    },
+    {
+      "id": "ZTF19aasbuev",
+      "role": "background",
+      "label": "(SIMBAD) QSO",
+      "score": 5,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 274
+    },
+    {
+      "id": "ZTF19aasbyqr",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 1,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": false
+      },
+      "no_positive_detection": false,
+      "n_det": 6
+    },
+    {
+      "id": "ZTF19aaxdibd",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF19aayijkh",
+      "role": "truth",
+      "label": "ant",
+      "score": 6,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 299
+    },
+    {
+      "id": "ZTF19abffmew",
+      "role": "background",
+      "label": "(SIMBAD) Galaxy",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF19abpttix",
+      "role": "background",
+      "label": "Unknown",
+      "score": 2,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 36
+    },
+    {
+      "id": "ZTF19aciflra",
+      "role": "background",
+      "label": "Unknown",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF19acvedkl",
+      "role": "background",
+      "label": "Unknown",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF20aacedmi",
+      "role": "truth",
+      "label": "sn",
+      "score": 3,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": false,
+        "blue_at_peak": true,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 21
+    },
+    {
+      "id": "ZTF20aatpzog",
+      "role": "truth",
+      "label": "tde",
+      "score": 2,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": false
+      },
+      "no_positive_detection": false,
+      "n_det": 5
+    },
+    {
+      "id": "ZTF20aazyvre",
+      "role": "truth",
+      "label": "sn",
+      "score": 4,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": false,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 18
+    },
+    {
+      "id": "ZTF20abexant",
+      "role": "background",
+      "label": "Unknown",
+      "score": 3,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 131
+    },
+    {
+      "id": "ZTF20abjwqqq",
+      "role": "truth",
+      "label": "tde",
+      "score": 5,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": false,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 32
+    },
+    {
+      "id": "ZTF20abkifth",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF20abmxstg",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 3,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": false,
+        "blue_at_peak": true,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 41
+    },
+    {
+      "id": "ZTF20accxwrk",
+      "role": "truth",
+      "label": "tde",
+      "score": 6,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 351
+    },
+    {
+      "id": "ZTF20acxtaau",
+      "role": "truth",
+      "label": "ant",
+      "score": 6,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 62
+    },
+    {
+      "id": "ZTF21aabgjcz",
+      "role": "truth",
+      "label": "tde",
+      "score": 6,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 108
+    },
+    {
+      "id": "ZTF21aasscnf",
+      "role": "background",
+      "label": "Unknown",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF21aazenvp",
+      "role": "truth",
+      "label": "tde",
+      "score": 4,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 17
+    },
+    {
+      "id": "ZTF21aazrgtw",
+      "role": "truth",
+      "label": "sn",
+      "score": 3,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": false,
+        "blue_at_peak": false,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 41
+    },
+    {
+      "id": "ZTF21abavqaz",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 5,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": false,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 53
+    },
+    {
+      "id": "ZTF21abgsmsu",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 1,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": false
+      },
+      "no_positive_detection": false,
+      "n_det": 2
+    },
+    {
+      "id": "ZTF21abhiokv",
+      "role": "background",
+      "label": "(SIMBAD) Galaxy",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF21abrptgf",
+      "role": "background",
+      "label": "(SIMBAD) Seyfert_1",
+      "score": 5,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 388
+    },
+    {
+      "id": "ZTF21abvydim",
+      "role": "truth",
+      "label": "ant",
+      "score": 3,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 11
+    },
+    {
+      "id": "ZTF22aananeo",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF22aancuhh",
+      "role": "background",
+      "label": "(SIMBAD) Galaxy",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF22aaoathx",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF22abvjubi",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 0,
+      "met": {},
+      "no_positive_detection": true,
+      "n_det": 0
+    },
+    {
+      "id": "ZTF22abxyoaz",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 0,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": false,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": false
+      },
+      "no_positive_detection": false,
+      "n_det": 9
+    },
+    {
+      "id": "ZTF22abygzlh",
+      "role": "background",
+      "label": "Unknown",
+      "score": 0,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": false,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": false
+      },
+      "no_positive_detection": false,
+      "n_det": 1
+    },
+    {
+      "id": "ZTF22abzajwl",
+      "role": "truth",
+      "label": "tde",
+      "score": 6,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 48
+    },
+    {
+      "id": "ZTF23aajnfna",
+      "role": "truth",
+      "label": "ambiguous",
+      "score": 6,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 67
+    },
+    {
+      "id": "ZTF23aajsmul",
+      "role": "truth",
+      "label": "tde",
+      "score": 5,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 41
+    },
+    {
+      "id": "ZTF23aaubptx",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 2,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": false,
+        "blue_at_peak": true,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 14
+    },
+    {
+      "id": "ZTF23aaxaehw",
+      "role": "truth",
+      "label": "ant",
+      "score": 5,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 53
+    },
+    {
+      "id": "ZTF23aazbqaw",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 0,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": false,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": false
+      },
+      "no_positive_detection": false,
+      "n_det": 2
+    },
+    {
+      "id": "ZTF23abjvojy",
+      "role": "truth",
+      "label": "ant",
+      "score": 4,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 18
+    },
+    {
+      "id": "ZTF23abowyjf",
+      "role": "truth",
+      "label": "ambiguous",
+      "score": 4,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 19
+    },
+    {
+      "id": "ZTF24aafvgzk",
+      "role": "truth",
+      "label": "ant",
+      "score": 6,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 69
+    },
+    {
+      "id": "ZTF24aahefwy",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 2,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": false,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 20
+    },
+    {
+      "id": "ZTF24aahihcl",
+      "role": "background",
+      "label": "SN candidate",
+      "score": 1,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": false,
+        "blue_at_peak": false,
+        "no_reddening": false,
+        "long_lived": false,
+        "well_sampled": false
+      },
+      "no_positive_detection": false,
+      "n_det": 9
+    },
+    {
+      "id": "ZTF24aaimfrw",
+      "role": "truth",
+      "label": "ant",
+      "score": 5,
+      "met": {
+        "galaxy_host": true,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": false,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 16
+    },
+    {
+      "id": "ZTF24aamfius",
+      "role": "truth",
+      "label": "ant",
+      "score": 5,
+      "met": {
+        "galaxy_host": false,
+        "nuclear": true,
+        "blue_at_peak": true,
+        "no_reddening": true,
+        "long_lived": true,
+        "well_sampled": true
+      },
+      "no_positive_detection": false,
+      "n_det": 137
+    }
+  ],
+  "criteria_met": {
+    "galaxy_host": {
+      "truth": 17,
+      "truth_n": 23,
+      "background": 7,
+      "background_n": 54
+    },
+    "nuclear": {
+      "truth": 21,
+      "truth_n": 23,
+      "background": 22,
+      "background_n": 54
+    },
+    "blue_at_peak": {
+      "truth": 18,
+      "truth_n": 23,
+      "background": 9,
+      "background_n": 54
+    },
+    "no_reddening": {
+      "truth": 13,
+      "truth_n": 23,
+      "background": 13,
+      "background_n": 54
+    },
+    "long_lived": {
+      "truth": 17,
+      "truth_n": 23,
+      "background": 20,
+      "background_n": 54
+    },
+    "well_sampled": {
+      "truth": 22,
+      "truth_n": 23,
+      "background": 23,
+      "background_n": 54
+    }
+  },
+  "no_positive_detection": {
+    "(SIMBAD) Seyfert_1": 5,
+    "(SIMBAD) Galaxy": 4,
+    "(SIMBAD) QSO": 5,
+    "Unknown": 5,
+    "SN candidate": 4
+  },
+  "recall_vs_load": [
+    {
+      "threshold": 6,
+      "truth_kept": 7,
+      "truth_n": 23,
+      "positives_kept": 7,
+      "positives_n": 19,
+      "background": {
+        "(SIMBAD) Galaxy": {
+          "passed": 0,
+          "n": 6
+        },
+        "(SIMBAD) QSO": {
+          "passed": 0,
+          "n": 12
+        },
+        "(SIMBAD) Seyfert_1": {
+          "passed": 1,
+          "n": 12
+        },
+        "SN candidate": {
+          "passed": 0,
+          "n": 12
+        },
+        "Unknown": {
+          "passed": 0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "threshold": 5,
+      "truth_kept": 14,
+      "truth_n": 23,
+      "positives_kept": 14,
+      "positives_n": 19,
+      "background": {
+        "(SIMBAD) Galaxy": {
+          "passed": 0,
+          "n": 6
+        },
+        "(SIMBAD) QSO": {
+          "passed": 4,
+          "n": 12
+        },
+        "(SIMBAD) Seyfert_1": {
+          "passed": 4,
+          "n": 12
+        },
+        "SN candidate": {
+          "passed": 1,
+          "n": 12
+        },
+        "Unknown": {
+          "passed": 0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "threshold": 4,
+      "truth_kept": 19,
+      "truth_n": 23,
+      "positives_kept": 17,
+      "positives_n": 19,
+      "background": {
+        "(SIMBAD) Galaxy": {
+          "passed": 1,
+          "n": 6
+        },
+        "(SIMBAD) QSO": {
+          "passed": 6,
+          "n": 12
+        },
+        "(SIMBAD) Seyfert_1": {
+          "passed": 5,
+          "n": 12
+        },
+        "SN candidate": {
+          "passed": 1,
+          "n": 12
+        },
+        "Unknown": {
+          "passed": 0,
+          "n": 12
+        }
+      }
+    },
+    {
+      "threshold": 3,
+      "truth_kept": 22,
+      "truth_n": 23,
+      "positives_kept": 18,
+      "positives_n": 19,
+      "background": {
+        "(SIMBAD) Galaxy": {
+          "passed": 1,
+          "n": 6
+        },
+        "(SIMBAD) QSO": {
+          "passed": 7,
+          "n": 12
+        },
+        "(SIMBAD) Seyfert_1": {
+          "passed": 5,
+          "n": 12
+        },
+        "SN candidate": {
+          "passed": 2,
+          "n": 12
+        },
+        "Unknown": {
+          "passed": 4,
+          "n": 12
+        }
+      }
+    },
+    {
+      "threshold": 2,
+      "truth_kept": 23,
+      "truth_n": 23,
+      "positives_kept": 19,
+      "positives_n": 19,
+      "background": {
+        "(SIMBAD) Galaxy": {
+          "passed": 2,
+          "n": 6
+        },
+        "(SIMBAD) QSO": {
+          "passed": 7,
+          "n": 12
+        },
+        "(SIMBAD) Seyfert_1": {
+          "passed": 6,
+          "n": 12
+        },
+        "SN candidate": {
+          "passed": 4,
+          "n": 12
+        },
+        "Unknown": {
+          "passed": 5,
+          "n": 12
+        }
+      }
+    },
+    {
+      "threshold": 1,
+      "truth_kept": 23,
+      "truth_n": 23,
+      "positives_kept": 19,
+      "positives_n": 19,
+      "background": {
+        "(SIMBAD) Galaxy": {
+          "passed": 2,
+          "n": 6
+        },
+        "(SIMBAD) QSO": {
+          "passed": 7,
+          "n": 12
+        },
+        "(SIMBAD) Seyfert_1": {
+          "passed": 7,
+          "n": 12
+        },
+        "SN candidate": {
+          "passed": 6,
+          "n": 12
+        },
+        "Unknown": {
+          "passed": 6,
+          "n": 12
+        }
+      }
+    }
+  ],
+  "decision": {
+    "threshold": 5,
+    "primary_stratum": "Unknown",
+    "positives_passed": 14,
+    "positives_n": 19,
+    "background_passed": 0,
+    "background_n": 12,
+    "difference": 0.7368421052631579,
+    "ci95_low": 0.4062073696058815,
+    "ci95_high": 0.8819358765321749,
+    "verdict": "supported",
+    "reason": ""
+  },
+  "injection": {
+    "seed": 2207,
+    "threshold": 5,
+    "cadence_model": "each band observed on a third of nights during a 240-day season, 30% of visits lost to weather, limiting magnitude 20.5 with 0.3 mag scatter",
+    "host": "injected as nuclear (0.2 arcsec) in a non-stellar host",
+    "bins": [
+      {
+        "peak_mag": 17.0,
+        "n": 100,
+        "recovered": 100,
+        "recovery": 1.0,
+        "ci95_low": 0.9630065017930143,
+        "ci95_high": 1.0
+      },
+      {
+        "peak_mag": 17.5,
+        "n": 100,
+        "recovered": 100,
+        "recovery": 1.0,
+        "ci95_low": 0.9630065017930143,
+        "ci95_high": 1.0
+      },
+      {
+        "peak_mag": 18.0,
+        "n": 100,
+        "recovered": 99,
+        "recovery": 0.99,
+        "ci95_low": 0.9455138038212947,
+        "ci95_high": 0.9982325679358593
+      },
+      {
+        "peak_mag": 18.5,
+        "n": 100,
+        "recovered": 94,
+        "recovery": 0.94,
+        "ci95_low": 0.8752318455410407,
+        "ci95_high": 0.9722138760368118
+      },
+      {
+        "peak_mag": 19.0,
+        "n": 100,
+        "recovered": 80,
+        "recovery": 0.8,
+        "ci95_low": 0.7111708344068411,
+        "ci95_high": 0.8666330666689674
+      },
+      {
+        "peak_mag": 19.5,
+        "n": 100,
+        "recovered": 55,
+        "recovery": 0.55,
+        "ci95_low": 0.45244602997442135,
+        "ci95_high": 0.6438546202048802
+      },
+      {
+        "peak_mag": 20.0,
+        "n": 100,
+        "recovered": 15,
+        "recovery": 0.15,
+        "ci95_low": 0.0930598528365663,
+        "ci95_high": 0.23283559590832364
+      },
+      {
+        "peak_mag": 20.5,
+        "n": 100,
+        "recovered": 0,
+        "recovery": 0.0,
+        "ci95_low": 3.341099972357286e-18,
+        "ci95_high": 0.03699349820698568
+      }
+    ]
+  }
+}

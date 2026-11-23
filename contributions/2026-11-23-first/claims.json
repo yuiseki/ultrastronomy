@@ -1,0 +1,9 @@
+[
+  {"kind": "inferred", "text": "On this sample the screen keeps about three quarters of the known nuclear transients and none of the Unknown stratum.", "basis": "measured.md: 14 of 19 against 0 of 12, interval above zero. Twelve objects is close to the minimum the rule accepts."},
+  {"kind": "inferred", "text": "Known active galaxies are where the screen separates least.", "basis": "measured.md: 4 of 12 in each of the QSO and Seyfert_1 strata pass, against 0 of 12 Unknown and 1 of 12 SN candidate. Same direction as the earlier run outside the harness."},
+  {"kind": "inferred", "text": "The positive side did not change with the corrections made to the code since the earlier run.", "basis": "14 of 19 here and in the mission README, although this version ignores the i band and rows without a sign flag and cuts alerts at 2026-11-01."},
+  {"kind": "unverified", "text": "What the nine background objects that scored 5 or more are.", "basis": "Nothing in this run examines an individual background object."},
+  {"kind": "unverified", "text": "Whether the recall would hold for objects nobody has noticed.", "basis": "The 19 positives were selected for looking like this, and the threshold was chosen after their scores had been seen."},
+  {"kind": "unverified", "text": "Sensitivity on the real sky.", "basis": "The injection places ideal flares in ideal hosts on a made-up schedule."},
+  {"kind": "unverified", "text": "Why the (SIMBAD) Galaxy stratum returned nothing for three of the six weeks.", "basis": "The three weeks are after mid 2022, where the mission README already records that this label returns nothing. The cause is not known."}
+]
