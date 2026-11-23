@@ -17,7 +17,9 @@ Step 2 of `ultra-rediscovery-run`: `runs/<name>/plan.json` exists and is empty.
 - `missions/<mission>/mission.json`: the question, the strata, where the known objects come from.
 - `missions/<mission>/README.md`: what earlier runs found. You may read it. Say so in `seen_before_lock`.
 
-Do not open cached light curves, `results.json` of this run, or any data file before the lock.
+Do not open cached light curves, `results.json` of this run, or any data file before the lock. The demo's output is synthetic and may be looked at; mention it in `seen_before_lock`.
+
+Leave `mission`, `kind` and `data.source` as `ultra init` wrote them.
 
 ## The fields
 
@@ -31,19 +33,19 @@ Do not open cached light curves, `results.json` of this run, or any data file be
 | `alternative_explanations` | Reasons the claim could come out supported while being wrong. See below |
 | `seen_before_lock` | Everything you had read or been told about results before locking. "Nothing" is a valid answer only if true |
 | `ai_budget` | The person's limit, in their words. Already filled in by `ultra init` |
-| `data.seed` | An integer you choose. It picks which weeks of the archive your run samples. Do not reuse a seed from `contributions/` |
-| `data.weeks`, `data.per_class` | How many random weeks, and how many objects per class and week. 3 and 2 is a small run |
-| `data.max_requests` | The most network requests this run may make |
+| `data.seed` | Any integer, picked without looking at data: a random number is best. It decides which weeks of the archive your run samples. Avoid seeds already used: those in `contributions/*/plan.json`, and 20261123 from the mission README |
+| `data.weeks`, `data.per_class` | How many random weeks, and how many objects per class and week. The default, 6 and 2, asks for 12 objects per class. Below 10 objects in your primary stratum the rule gives no verdict |
+| `data.max_requests` | The most network requests this run may make, over all attempts. At most 23 + weeks x 5 x (1 + per_class) are needed; `ultra lock` refuses a plan that cannot fit |
 
-The rule is applied by the program: `supported` if the 95% interval of the difference in pass rates lies above zero, `rejected` if the difference is zero or negative, `undecided` otherwise. You do not get to choose the verdict.
+The rule is applied by the program to the difference in pass rates, positives minus background: `supported` if its 95% interval lies above zero, `rejected` if the interval lies below zero, `undecided` if it contains zero or either side has fewer than 10 objects. Seeing no difference is `undecided`, not `rejected`. You do not get to choose the verdict.
 
 ## Other explanations to consider
 
 Write the ones that apply to this run. Leave out the ones that do not.
 
-- Circularity: the known objects were chosen by a classifier and by eye for looking like this. A screen for the same look passes them by construction.
+- Circularity: the known objects were chosen by a classifier and by eye for looking like this, and the threshold used by earlier runs was picked after their scores had been seen. The positive side is the same 19 objects in every run. A new run repeats the background side only; it is not an independent replication of the recall.
 - Observation effort: the number of detections and the duration depend on how often that field was observed, not only on the object.
-- Sampling: the background is drawn from objects that alerted in a given week, so objects that alert often are over-represented.
+- Sampling: a stratum is drawn from the last 3,000 alerts of its class in the sampled week. For a busy class that is the tail of one night, not a week. Objects that alert often are over-represented.
 - Chance: a run has few known objects and a small background sample.
 - Label drift: a class label may stop being used partway through the archive, so a stratum covers only part of the period.
 
@@ -69,7 +71,7 @@ After the lock, `uv run ultra status runs/<name>` shows "done: lock the plan". R
   "decision_rule": {"threshold": 5, "primary_stratum": "Unknown"},
   "rationale": "Same rule as the first run in missions/ztf-nuclear-transients/README.md, to replicate it on a new sample.",
   "failure_interpretation": "On this sample the screen does not separate them. I will not change the threshold, the stratum or the seed to recover the claim.",
-  "alternative_explanations": ["Circularity: the known objects were selected for looking TDE-like.", "Chance: 6 background objects per stratum."],
+  "alternative_explanations": ["Circularity: the known objects were selected for looking TDE-like and the threshold was chosen after seeing their scores; this run repeats only the background side.", "Chance: 12 background objects per stratum."],
   "seen_before_lock": "The mission README, including the first run's table. No data of this run."
 }
 ```

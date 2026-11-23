@@ -21,17 +21,17 @@ ZTF photographs the sky, subtracts an older reference image, and issues an alert
 | Column | Meaning | Trap |
 |---|---|---|
 | `i:jd` | Time, as a Julian Date (days) | Not a calendar date. JD 2459000.5 is 2020-05-31 |
-| `i:fid` | Filter: 1 is g (green), 2 is r (red), 3 is i | Colour needs g and r on the same night |
+| `i:fid` | Filter: 1 is g (green), 2 is r (red), 3 is i | The harness uses g and r only. Colour needs a g and an r detection within 1.5 days of each other |
 | `i:magpsf` | Brightness of the difference, in magnitudes | Smaller is brighter. 5 magnitudes is a factor of 100. It is the excess over the reference, not the object's total brightness |
-| `i:isdiffpos` | `t` if the source got brighter than the reference, `f` if fainter | For `f`, `magpsf` is the size of the deficit. The harness ignores those rows. An object with only `f` rows scores 0 |
-| `i:distpsnr1` | Distance in arcseconds to the nearest catalogued source | -999 means no match, not a negative distance |
+| `i:isdiffpos` | `t` if the source got brighter than the reference, `f` if fainter | For `f`, `magpsf` is the size of the deficit. The harness ignores those rows, and rows where the flag is missing. An object with no `t` rows scores 0 |
+| `i:distpsnr1` | Distance in arcseconds to the nearest source in the Pan-STARRS catalogue | -999 means no match, not a negative distance. The nearest source is usually, not always, the host galaxy; the `nuclear` criterion assumes it is |
 | `i:sgscore1` | 0 looks like a galaxy, 1 looks like a star | Bright galaxy cores can score high; that is why some active galaxies fail `galaxy_host` |
 
-No other column is requested. In particular `d:tns` and `d:cdsxmatch` are never read: they hold classifications added later, some of them after the paper that listed the known objects, so using them would hand the screen the answer.
+No other column is requested. In particular `d:tns` and `d:cdsxmatch` are never read: they hold classifications added later, some of them after the paper that listed the known objects, so using them would hand the screen the answer. The class names of the strata do come from Fink's cross-matching. They decide which pile an object is counted in, never its score.
 
 ## The six criteria
 
-`galaxy_host`, `nuclear`, `blue_at_peak`, `no_reddening`, `long_lived`, `well_sampled`. They follow the photometric selection of tidal disruption events in van Velzen et al. (2021). A value that cannot be computed counts as not met.
+`galaxy_host`, `nuclear`, `blue_at_peak`, `no_reddening`, `long_lived`, `well_sampled`. The idea is the photometric selection of tidal disruption events in van Velzen et al. (2021); the thresholds were written from memory of that paper and not checked against it, and the last two criteria are simplifications. A value that cannot be computed counts as not met. `src/ultrastronomy/score.py` lists the screen's known weaknesses.
 
 ## What the screen cannot tell you
 
@@ -39,6 +39,7 @@ No other column is requested. In particular `d:tns` and `d:cdsxmatch` are never 
 - Anything about objects with too few alerts. The paper behind the known objects used forced photometry, which has many more points than alerts. A known object that fails for lack of a colour measurement failed because of the data, not because it is ordinary.
 - Much about known active galaxies. Their nuclei are central, blue and long-lived on their own, so a large share of them pass.
 - The real mix of the sky. The background is the same number of objects per class, while the real stream is mostly the `Unknown` class.
+- How faint a real flare can be. The injection test places ideal flares in ideal hosts on a made-up observing schedule. It shows where the criteria stop working on clean data, mostly because the colour slope can no longer be measured.
 
 ## Typical failures
 

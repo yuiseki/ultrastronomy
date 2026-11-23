@@ -10,7 +10,8 @@ Let a person with an AI agent and some spare usage do a small piece of astronomy
 - A central server, accounts, a job scheduler, or a layer over AI providers. A participant uses the agent they already have.
 - Moving or pooling usage limits or credits between people. Providers' terms decide that, not this project.
 - Classifying objects. The screen ranks; classification needs spectra and people.
-- A new detection algorithm. The screen is taken from published criteria.
+- A new detection algorithm. The screen is modelled on published criteria.
+- Security against a participant who forges a record. See "What is not enforced".
 
 ## Architecture
 
@@ -18,48 +19,75 @@ Three parts, each replaceable.
 
 | Part | Where | Job |
 |---|---|---|
-| Harness | `src/ultrastronomy/`, the `ultra` command | Fetch within a budget, compute, decide, record, refuse |
+| Harness | `src/ultrastronomy/`, the `ultra` command | Fetch within a budget, compute, decide, record, recompute, refuse |
 | Skills | `.agents/skills/` | Tell an agent what to do next and what the numbers mean |
 | Missions | `missions/` | A question, a list of known objects, strata, and what earlier runs found |
 
-Everything is local files. A run is a directory; a contribution is a copy of that directory without raw data, sent as a pull request.
+Everything is local files. A run is a directory; a contribution is a copy of that directory without raw data. The harness has one dependency (numpy) and uses the standard library for the network.
 
-The harness has one dependency (numpy) and uses the standard library for the network.
+## Who the harness protects against
 
-## How the harness keeps an agent from being wrong
+An agent, or a person, who is trying to do the work properly and makes the usual mistakes: deciding the comparison after seeing the result, misreading a column, typing a number from memory, dropping an inconvenient object, describing a pass as a find.
 
-Each line is a mechanism in code, with a test in `tests/test_harness.py`. None of them relies on the agent choosing to behave.
+It is not built to stop someone who sets out to deceive. Everything lives in files on their own machine. That is what review is for.
+
+## What is enforced, and how
+
+Each line is a mechanism in code with a test in `tests/test_harness.py`.
 
 | Risk | Mechanism |
 |---|---|
-| The plan is fitted to the result | `ultra fetch`, `evaluate` and `inject` refuse to run until `ultra lock` has hashed the plan. A changed plan fails every later command |
-| The scoring code is changed after the fact | The lock also hashes `score.py` and `lightcurve.py` |
-| The verdict is chosen by the agent | The program applies the locked rule. A gate recomputes the verdict from the stored counts |
-| A number is typed or misremembered | A `measured` claim must point into `results.json`, and its value must equal what is there |
-| A guess is presented as a measurement | Every claim is labelled `measured`, `inferred` or `unverified`; the report needs the three sections |
-| A later classification leaks into the screen | Only allow-listed alert columns are ever requested from the API |
-| Data changes or cannot be traced | Every object has a provenance record with source, time and content hash; changed content is refused |
-| A known object is quietly dropped | A gate requires every known object of the mission to be scored |
-| Sensitivity is never measured | A gate requires an injection and recovery table at the locked threshold |
-| A candidate is announced | A gate rejects announcement wording; synthetic runs cannot be exported; no command publishes anything |
-| The data API is overused | A request count is shown before fetching, `--confirm` is required, and a hard budget stops the run |
+| The comparison is chosen after seeing results | `fetch` and `evaluate` refuse to run until `lock` has hashed the plan. A changed plan fails every later command |
+| The code or the mission is changed after the fact | The lock hashes every module of the package and the mission's files, and records the git commit |
+| The verdict is chosen by the agent | The program applies the locked rule |
+| A stored number is wrong, edited or invented | The gates do not read the stored results as truth: they recompute them from the data and the locked plan and require equality, including the injection table |
+| A number is typed or misremembered in the report | The `## Measured` section must equal the text the program generated |
+| A true number is put under a false sentence | The agent cannot write measured statements at all; its claims are `inferred` or `unverified`, each with a basis |
+| A guess about one object is slipped in as a reading of the results | Object identifiers are not allowed in `## Inferred` |
+| A later classification leaks into the screen | Only allow-listed alert columns are requested, and the gates check the columns present in the data |
+| Data changed, or is not the data the record names | Every object has a source, a time and a content hash. Without the data on the machine the record is reported as not verified, not as passing |
+| A known object is quietly dropped | Every known object of the mission must be in the provenance |
+| A verdict on almost no data | Fewer than 10 objects on either side gives `undecided` |
+| No difference read as a rejection | `rejected` needs the interval below zero |
+| The data API is overused | The request count is shown first, `--confirm` is required, and a budget that adds up over attempts stops the run |
 | AI usage runs away | The person's limit is recorded in the plan in their words. The harness cannot see usage and never reports it |
 
-What the harness cannot do: stop an agent from reading a cache file outside the harness before locking, or from writing a misleading sentence that avoids the listed words. The plan's `seen_before_lock` field and the report's "Not verified" section are where honesty is asked for; a reviewer reads them.
+## What is not enforced
+
+Stated plainly, because the first version of this document claimed more than the code did, and an independent review showed it (see `evals/README.md`).
+
+- The lock is a file. Someone can delete it, change the plan and lock again. The log records two locks and the gate catches that, but the log is a file too. The ordering is only as trustworthy as the place it is published: commit the locked plan before fetching, and the commit history of the pull request shows the order.
+- Data can be read before the lock, by opening the cache or by calling the functions directly, and several seeds can be tried before one is locked. `seen_before_lock` is a declaration.
+- A cache can be filled with invented light curves, and a run on it passes the local gates. Only a re-download catches it: `ultra verify --refetch`.
+- The wording check is a lint. It flags common announcement words, fails honest denials that use the same words, and can be evaded by rephrasing.
+- Sentences in `## Inferred` and `## Not verified` are free text. They can be wrong, and can contain numbers nobody compared with anything.
+- `ultra pool` trusts the records in `contributions/`. They get there through review.
+
+## Review
+
+A contribution is a pull request. The reviewer runs:
+
+```sh
+uv run ultra verify contributions/<name> --refetch --confirm
+```
+
+That downloads every object in the record's provenance again, checks the hashes, recomputes the results and the measured text, and runs the remaining gates. Then the reviewer reads the two free-text sections. A record that cannot be recomputed is not merged.
+
+Alerts are cut at the mission's `alerts_until` date and sorted before hashing, so that an object which kept alerting gives the same rows later. If Fink reprocesses its archive the hashes will change; the gate reports that as a mismatch, and the record then needs a new run.
 
 ## How this follows Claudestronomy's stated practices
 
 Claudestronomy (https://claudestronomy.com/) lists six things it cares about. ultrastronomy is independent of it and is not endorsed by it; it adopts the same practices.
 
-| Practice | Here |
-|---|---|
-| Recover known objects in the same data before trusting a search | The whole first mission |
-| Inject synthetic sources, measure recovery, calibrate false positives separately | `ultra inject` for recovery; the background strata for the pass rate of everything else. The injection uses a model cadence, not real epochs |
-| Write down thresholds and predictions before new data arrives; document later changes | `ultra lock`; a change means a new run |
-| Have a fresh agent session challenge the analysis | A contribution is re-run from its provenance by a reviewer. `evals/` records what fresh agents did with and without the harness |
-| Publish code, methods and results; say what has not been ruled out | Records in `contributions/`; the "Not verified" section |
-| Publish useful null results with sensitivity and coverage | `rejected` and `undecided` runs are merged like any other, with their injection table |
+| Practice | Here | How far |
+|---|---|---|
+| Recover known objects in the same data before trusting a search | The whole first mission | Done, on objects that were selected for looking like the screen |
+| Inject synthetic sources, measure recovery, calibrate false positives separately | The injection table; the background strata | Injection is on a model schedule with ideal hosts, not on real epochs. Background pass rates are per class, not weighted to the real stream |
+| Write down thresholds and predictions before new data arrives; document later changes | `ultra lock`; a change means a new run | Enforced locally; anchored only if the plan is committed first |
+| Have a fresh agent session challenge the analysis | `ultra verify --refetch` by a reviewer; `evals/` records what fresh agents did | The review that reshaped the gates was one agent, once |
+| Publish code, methods and results; say what has not been ruled out | Records in `contributions/`; the "Not verified" section | Done |
+| Publish useful null results with sensitivity and coverage | `rejected` and `undecided` runs are merged like any other | Coverage is stated as weeks and classes sampled, not as a completeness curve on the sky |
 
 ## MVP
 
-See the acceptance criteria in `INITIAL_PROMPT.md`. Which are met, and how that was checked, is in `evals/README.md`.
+The acceptance criteria are in `INITIAL_PROMPT.md`. Which are met, and how that was checked, is in `evals/README.md`.

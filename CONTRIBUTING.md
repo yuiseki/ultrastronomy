@@ -13,11 +13,13 @@ git add contributions/<name>
 git commit -m "Add run <name>"
 ```
 
-Open a pull request. The record holds the plan, its lock, the provenance, the computed results, the claims and the report. It holds no raw data, and nothing about you beyond what you wrote in it.
+Open a pull request. The record holds the plan, its lock, the log, the provenance, the computed results, the measured text, the claims and the report. It holds no raw data, and nothing about you beyond what you wrote in it.
+
+A lock on your own disk proves nothing to anyone else. If you want the order of events to be checkable, commit `plan.json` and `plan.lock` and push them before you run `ultra fetch`; the history of the pull request then shows that the plan came first. This is optional, and it is the only way the lock becomes more than your word.
 
 A run whose claim was rejected or undecided is as welcome as one that was supported. So is a run that stopped early and says why.
 
-Reviewers re-run `ultra gates` on the record and re-run `ultra evaluate` from the provenance. A record that cannot be reproduced is not merged.
+A reviewer runs `uv run ultra verify contributions/<name> --refetch --confirm`, which downloads the record's objects again, recomputes everything and compares, and then reads the two free-text sections of the report. A record that cannot be recomputed is not merged.
 
 ## 2. A failure of the harness or a skill
 
