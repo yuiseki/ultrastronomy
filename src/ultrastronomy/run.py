@@ -39,6 +39,19 @@ def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+# The modules that turn a plan into numbers. A change to any of them, or to a
+# mission file, makes an older record impossible to recompute with this code.
+# The gates, the command line and this file are not in the list: tightening a
+# check must not invalidate the records it checks.
+COMPUTE = ("lightcurve.py", "score.py", "intervals.py", "synth.py", "fink.py", "mission.py")
+
+
+def changed_since_lock(record: dict, mission_dir: Path) -> list[str]:
+    now_hashes = code_hashes(mission_dir)
+    keys = [k for k in now_hashes if k in COMPUTE or k.startswith("mission/")]
+    return sorted(k for k in keys if record["code_sha256"].get(k) != now_hashes[k])
+
+
 def code_hashes(mission_dir: Path | None = None) -> dict:
     """Hashes of everything that turns a plan into numbers: the package and the mission files."""
     package = Path(__file__).parent
@@ -122,7 +135,7 @@ def require_lock(run: Path, mission: dict) -> dict:
     record = read_json(run / "plan.lock")
     if file_sha256(run / "plan.json") != record["plan_sha256"]:
         raise ValueError("plan.json changed after it was locked. Start a new run instead.")
-    changed = sorted(k for k, v in code_hashes(mission["dir"]).items() if record["code_sha256"].get(k) != v)
+    changed = changed_since_lock(record, mission["dir"])
     if changed:
         raise ValueError(f"changed since the plan was locked: {changed}. "
                          f"Check out commit {record.get('git_commit') or '(unknown)'} or start a new run.")

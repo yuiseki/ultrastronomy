@@ -38,15 +38,15 @@ Each line is a mechanism in code with a test in `tests/test_harness.py`.
 | Risk | Mechanism |
 |---|---|
 | The comparison is chosen after seeing results | `fetch` and `evaluate` refuse to run until `lock` has hashed the plan. A changed plan fails every later command |
-| The code or the mission is changed after the fact | The lock hashes every module of the package and the mission's files, and records the git commit |
+| The code or the mission is changed after the fact | The lock hashes every module of the package and the mission's files, and records the git commit. The modules that compute, and the mission files, must still match; the gates and the command line may change without invalidating a record |
 | The verdict is chosen by the agent | The program applies the locked rule |
 | A stored number is wrong, edited or invented | The gates do not read the stored results as truth: they recompute them from the data and the locked plan and require equality, including the injection table |
-| A number is typed or misremembered in the report | The `## Measured` section must equal the text the program generated |
+| A number is typed or misremembered in the report | The `## Measured` section, and `measured.md`, must equal the text the program generated. Nothing but a title may precede the section, and HTML is not allowed |
 | A true number is put under a false sentence | The agent cannot write measured statements at all; its claims are `inferred` or `unverified`, each with a basis |
-| A guess about one object is slipped in as a reading of the results | Object identifiers are not allowed in `## Inferred` |
+| A guess about one object is slipped in as a reading of the results | Object identifiers are not allowed in `## Inferred` or in an inferred claim, with formatting removed before matching |
 | A later classification leaks into the screen | Only allow-listed alert columns are requested, and the gates check the columns present in the data |
 | Data changed, or is not the data the record names | Every object has a source, a time and a content hash. Without the data on the machine the record is reported as not verified, not as passing |
-| A known object is quietly dropped | Every known object of the mission must be in the provenance |
+| A known object is dropped or relabelled, a stratum is left out, an object is counted twice | The list of objects, their roles and their labels is derived again from the locked plan, the mission and the sampled weeks, and must equal the provenance |
 | A verdict on almost no data | Fewer than 10 objects on either side gives `undecided` |
 | No difference read as a rejection | `rejected` needs the interval below zero |
 | The data API is overused | The request count is shown first, `--confirm` is required, and a budget that adds up over attempts stops the run |
@@ -54,7 +54,7 @@ Each line is a mechanism in code with a test in `tests/test_harness.py`.
 
 ## What is not enforced
 
-Stated plainly, because the first version of this document claimed more than the code did, and an independent review showed it (see `evals/README.md`).
+Stated plainly, because the first version of this document claimed more than the code did, and two independent reviews showed it (see `evals/README.md`). The table above is what the tests cover today. It has been wrong twice.
 
 - The lock is a file. Someone can delete it, change the plan and lock again. The log records two locks and the gate catches that, but the log is a file too. The ordering is only as trustworthy as the place it is published: commit the locked plan before fetching, and the commit history of the pull request shows the order.
 - Data can be read before the lock, by opening the cache or by calling the functions directly, and several seeds can be tried before one is locked. `seen_before_lock` is a declaration.
@@ -71,7 +71,7 @@ A contribution is a pull request. The reviewer runs:
 uv run ultra verify contributions/<name> --refetch --confirm
 ```
 
-That downloads every object in the record's provenance again, checks the hashes, recomputes the results and the measured text, and runs the remaining gates. Then the reviewer reads the two free-text sections. A record that cannot be recomputed is not merged.
+That downloads the sampled weeks and every object in the record's provenance again, derives the sample, checks the hashes, recomputes the results and the measured text, and runs the remaining gates. Then the reviewer reads the two free-text sections. A record that cannot be recomputed is not merged.
 
 Alerts are cut at the mission's `alerts_until` date and sorted before hashing, so that an object which kept alerting gives the same rows later. If Fink reprocesses its archive the hashes will change; the gate reports that as a mismatch, and the record then needs a new run.
 

@@ -1,7 +1,5 @@
 # Run 2026-11-23-first
 
-The maintainer's first run through the harness on real data: the rule of the earlier run, on six new weeks (seed 2207).
-
 ## Measured
 
 - Data: ZTF alert photometry from the Fink API.
@@ -19,6 +17,8 @@ The maintainer's first run through the harness on real data: the rule of the ear
 - Synthetic flares passing at that score, by peak magnitude, under a model cadence (each band observed on a third of nights during a 240-day season, 30% of visits lost to weather, limiting magnitude 20.5 with 0.3 mag scatter): 17.0: 100 of 100, 17.5: 100 of 100, 18.0: 99 of 100, 18.5: 94 of 100, 19.0: 80 of 100, 19.5: 55 of 100, 20.0: 15 of 100, 20.5: 0 of 100.
 
 ## Inferred
+
+This is the maintainer's first run through the harness on real data: the rule of the earlier run, on six new weeks.
 
 On this sample the screen keeps about three quarters of the known nuclear transients and none of the Unknown stratum. Twelve Unknown objects is close to the smallest sample the rule accepts, so this agrees with the earlier run more than it adds to it.
 

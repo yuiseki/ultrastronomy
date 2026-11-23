@@ -156,15 +156,28 @@ def cmd_verify(a) -> int:
     mission = _mission_of(record)
     cache = cache_dir()
     if a.refetch:
+        import datetime as dt
+        plan = read_json(record / "plan.json")
         provenance = read_json(record / "provenance.json")
         cache = Path(".cache/verify") / record.name
-        print(f"re-fetching {len(provenance)} objects into {cache} (at most {len(provenance)} requests).")
+        weeks = M.sample_weeks(plan["data"]["seed"], plan["data"]["weeks"], mission["first_date"], mission["last_date"])
+        most = len(provenance) + len(weeks) * len(mission["strata"])
+        print(f"re-fetching {len(weeks)} sampled weeks and {len(provenance)} objects into {cache} (at most {most} requests).")
         if not a.confirm:
             print("nothing was fetched. Re-run with --confirm to go ahead.")
             return 0
-        budget = fink.Budget(len(provenance))
-        for p in provenance:
-            fink.object_alerts(p["object_id"], cache, budget, mission["alerts_until"])
+        budget = fink.Budget(most)
+        try:
+            for week in weeks:
+                stop = (dt.date.fromisoformat(week) + dt.timedelta(days=7)).isoformat()
+                for stratum in mission["strata"]:
+                    fink.class_week(stratum, week, stop, cache, budget)
+            for p in provenance:
+                fink.object_alerts(p["object_id"], cache, budget, mission["alerts_until"])
+        except Exception as e:  # a failed download is not a failed record: say so and stop
+            print(f"re-fetch failed after {budget.used} requests: {type(e).__name__}: {e}\n"
+                  "The record was not checked. What was downloaded is cached; run the command again.", file=sys.stderr)
+            return 2
     return _print_gates(run_gates(record, mission, cache))
 
 

@@ -335,3 +335,109 @@ def test_synthetic_supernovae_redden_and_flares_do_not():
     tde = [light_curve_features(synth.tde_like(rng, synth.cadence(rng, 2459000.0, 900), 18.0)) for _ in range(40)]
     slopes = lambda fs: sorted(f["g_r_slope"] for f in fs if f and f["g_r_slope"] == f["g_r_slope"])
     assert slopes(sn)[len(slopes(sn)) // 2] > slopes(tde)[len(slopes(tde)) // 2]
+
+
+# --- second review: a free model got nine edited records through the rebuilt gates.
+#     Most went through provenance.json, which the gates used to trust.
+
+
+def reevaluate(run):
+    assert cli.main(["evaluate", str(run)]) == 0
+    (run / "report.md").write_text(
+        "# Report\n\n## Measured\n\n" + (run / "measured.md").read_text(encoding="utf-8") +
+        "\n## Inferred\n\nNothing.\n\n## Not verified\n\n- Everything.\n", encoding="utf-8")
+
+
+def edit_provenance(run, edit):
+    provenance = read_json(run / "provenance.json")
+    provenance = edit(provenance) or provenance
+    write_json(run / "provenance.json", provenance)
+    reevaluate(run)
+
+
+def test_relabelling_failed_positives_is_caught(demo):
+    low = {o["id"] for o in read_json(demo / "results.json")["objects"] if o["role"] == "truth" and o["score"] < 5}
+    assert low
+    edit_provenance(demo, lambda p: [x.update(label="sn") for x in p if x["object_id"] in low] and None)
+    assert failed(demo) == ["sample_matches_plan"]
+
+
+def test_dropping_a_stratum_is_caught(demo):
+    edit_provenance(demo, lambda p: [x for x in p if x["label"] != "(SIMBAD) QSO"])
+    assert failed(demo) == ["sample_matches_plan"]
+
+
+def test_duplicated_objects_are_caught(demo):
+    edit_provenance(demo, lambda p: p + [dict(p[0])] * 9)
+    assert failed(demo) == ["sample_matches_plan"]
+
+
+def test_text_smuggled_into_measured_through_a_label_is_caught(demo):
+    def edit(p):
+        p[-1]["label"] = "Unknown` objects passing: 60 of 60.\n- A new class of transients was found.\n- `Unknown"
+    edit_provenance(demo, edit)
+    assert "sample_matches_plan" in failed(demo)
+
+
+def test_an_edited_measured_md_is_caught(demo):
+    path = demo / "measured.md"
+    path.write_text(path.read_text(encoding="utf-8").replace("supported", "rejected"), encoding="utf-8")
+    assert failed(demo) == ["measured_is_generated"]
+
+
+def test_text_before_the_first_heading_is_caught(demo):
+    report = (demo / "report.md").read_text(encoding="utf-8")
+    (demo / "report.md").write_text(report.replace("## Measured", "The screen kept all 20 of 20.\n\n## Measured", 1), encoding="utf-8")
+    assert failed(demo) == ["report_structure"]
+
+
+def test_html_in_the_report_is_caught(demo):
+    append_to_section(demo, "Inferred", "<h2>Measured</h2>\n\nPositives passing: 20 of 20.")
+    assert failed(demo) == ["report_structure"]
+
+
+def test_an_object_id_split_by_markdown_is_caught(demo):
+    append_to_section(demo, "Inferred", "SYN-**QSO**-003 looks like a flare.")
+    assert failed(demo) == ["report_structure"]
+
+
+def test_an_object_named_in_an_inferred_claim_is_caught(demo):
+    claims = read_json(demo / "claims.json")
+    claims[0]["basis"] = "SYN-QSO-003 scored 6."
+    write_json(demo / "claims.json", claims)
+    assert failed(demo) == ["claims_labelled"]
+
+
+def test_the_gate_derives_the_same_sample_as_the_fetch(tmp_path, monkeypatch):
+    """`gates.expected_sample` repeats the selection in `mission.fetch_fink`. Keep them in step."""
+    from ultrastronomy.gates import expected_sample
+    mission = M.load_mission("ztf-nuclear-transients")
+    plan = new_plan(mission, "x")
+    plan["data"].update({"seed": 42, "weeks": 2, "per_class": 2, "max_requests": 200})
+
+    def fake_post(endpoint, payload, budget, timeout=300.0):
+        budget.spend()
+        if endpoint == "latests":
+            tag = f"{payload['class']}{payload['startdate']}".replace(" ", "").replace("-", "")
+            return [{"i:objectId": f"ZTF{tag}{i}", "i:jd": 2459000.0} for i in range(5)]
+        return [{"i:objectId": payload["objectId"], "i:jd": 2459000.0, "i:fid": 1, "i:magpsf": 19.0, "i:isdiffpos": "t"}]
+
+    monkeypatch.setattr(fink, "_post", fake_post)
+    monkeypatch.setattr(fink, "PAUSE_SECONDS", 0)
+    run = tmp_path / "run"
+    run.mkdir()
+    provenance = M.fetch_fink(run, plan, mission, tmp_path / "cache", fink.Budget(200))
+    fetched = sorted((p["object_id"], p["role"], p["label"], p["week"]) for p in provenance)
+    assert fetched == sorted(expected_sample(plan, mission, tmp_path / "cache"))
+    assert len(fetched) == 23 + 2 * 5 * 2
+
+
+def test_a_change_to_the_gates_does_not_invalidate_a_record(demo):
+    # Tightening a check must not make older records unverifiable.
+    from ultrastronomy.run import COMPUTE, changed_since_lock
+    record = read_json(demo / "plan.lock")
+    record["code_sha256"]["gates.py"] = "0" * 64
+    record["code_sha256"]["cli.py"] = "0" * 64
+    assert changed_since_lock(record, DEMO["dir"]) == []
+    record["code_sha256"][COMPUTE[0]] = "0" * 64
+    assert changed_since_lock(record, DEMO["dir"]) == [COMPUTE[0]]

@@ -60,7 +60,7 @@ When the gates pass, `uv run ultra export runs/<name>` copies the record (no raw
 
 ## Status
 
-- Review: an independent agent got 24 of 31 tampered records through the first version of the gates. The gates were rebuilt around recomputation and each of those cases is now a test. What a determined forger can still do is listed in [docs/design.md](docs/design.md).
+- Review: an independent agent got 24 of 31 tampered records through the first version of the gates, and a free model then got 9 of 10 through the rebuilt version. Each case is now a test, and the gates have not been attacked since. What a determined forger can still do is listed in [docs/design.md](docs/design.md).
 - Agents: a full run has been completed by a Claude Code subagent and by OpenCode with a free model, once each. Codex and Gemini CLI have not been tried. The skills follow the [Agent Skills specification](https://agentskills.io/specification) and the entry point is a plain `AGENTS.md`. `CLAUDE.md` and `.claude/skills` only point Claude Code at `AGENTS.md` and `.agents/skills`; they hold nothing of their own.
 - Missions: one.
 - Injection: uses a simplified model of when ZTF observes, not the real schedule, and ideal hosts.

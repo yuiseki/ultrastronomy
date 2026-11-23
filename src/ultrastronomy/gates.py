@@ -20,7 +20,7 @@ from pathlib import Path
 
 from . import fink
 from . import mission as M
-from .run import code_hashes, file_sha256, parse_time, read_json
+from .run import changed_since_lock, file_sha256, parse_time, read_json
 
 CLAIM_KINDS = {"inferred", "unverified"}
 REPORT_SECTIONS = ["Measured", "Inferred", "Not verified"]
@@ -57,6 +57,38 @@ def report_sections(text: str) -> list[tuple[str, str]]:
     return out
 
 
+def expected_sample(plan: dict, mission: dict, cache: Path | None) -> list[tuple]:
+    """(object, role, label, week) for every object the locked plan selects.
+
+    This repeats the selection of `mission.fetch_fink` from the plan, the
+    mission and the cached week listings, without reading provenance.json.
+    A test keeps the two in step.
+    """
+    import datetime as dt
+    import hashlib
+    import random
+    from . import synth
+    d = plan["data"]
+    if d["source"] == "synthetic":
+        _, truth, background = synth.demo_population(d["seed"])
+        return ([(t["ztf_id"], "truth", t["group"], "") for t in truth] +
+                [(b["ztf_id"], "background", b["stratum"], "") for b in background])
+    if cache is None:
+        raise FileNotFoundError("no cache")
+    rng = random.Random(d["seed"])
+    truth_ids = {t["ztf_id"] for t in mission["truth"]}
+    out = [(t["ztf_id"], "truth", t["group"], "") for t in mission["truth"]]
+    for week in M.sample_weeks(d["seed"], d["weeks"], mission["first_date"], mission["last_date"]):
+        stop = (dt.date.fromisoformat(week) + dt.timedelta(days=7)).isoformat()
+        for stratum in mission["strata"]:
+            key = hashlib.sha256(f"{stratum}|{week}|{stop}|3000".encode()).hexdigest()[:16]
+            entry = read_json(cache / "weeks" / f"{key}.json")
+            taken = {o[0] for o in out}
+            ids = [i for i in entry["ids"] if i not in truth_ids and i not in taken]
+            out += [(oid, "background", stratum, week) for oid in rng.sample(ids, min(d["per_class"], len(ids)))]
+    return out
+
+
 def _gate(name, passed, detail=""):
     return {"gate": name, "passed": bool(passed), "detail": "" if passed else detail}
 
@@ -74,7 +106,7 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
                        "plan.json differs from the hash in plan.lock"))
 
     # 2. The code and the mission files are the ones that were locked.
-    changed = sorted(k for k, v in code_hashes(mission["dir"]).items() if lock["code_sha256"].get(k) != v)
+    changed = changed_since_lock(lock, mission["dir"])
     gates.append(_gate("code_unchanged", not changed,
                        f"differs from the lock: {changed}. To check this record, use commit "
                        f"{lock.get('git_commit') or '(not recorded)'}"))
@@ -115,11 +147,25 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
     extra = sorted({k for rows in objects.values() for r in rows for k in r} - set(fink.COLUMNS))
     gates.append(_gate("no_leaky_columns", not extra, f"columns outside the allow-list in the data: {extra}"))
 
-    # 6. Every known object of the mission was scored; none was quietly dropped.
-    wanted = {t["ztf_id"] for t in mission["truth"]}
-    got = {p["object_id"] for p in provenance if p["role"] == "truth"}
-    ok = wanted == got if plan["data"]["source"] == "fink" else bool(got)
-    gates.append(_gate("known_objects_scored", ok, f"not scored: {sorted(wanted - got)}"))
+    # 6. The objects, their roles and their labels are the ones the locked plan
+    #    gives. provenance.json is not trusted: the sample is derived again.
+    try:
+        expected = expected_sample(plan, mission, cache)
+    except FileNotFoundError:
+        gates.append(_gate("sample_matches_plan", False,
+                           "the sampled weeks are not on this machine, so the sample could not be derived again. "
+                           "Run `ultra verify <record> --refetch --confirm`"))
+        return gates
+    actual = [(p["object_id"], p["role"], p["label"], p["week"]) for p in provenance]
+    problems = []
+    if len(actual) != len(set(a[0] for a in actual)):
+        problems.append("an object appears more than once")
+    if sorted(actual) != sorted(expected):
+        missing = sorted(set(expected) - set(actual))
+        added = sorted(set(actual) - set(expected))
+        problems.append(f"differs from the sample the plan gives; missing {len(missing)} {missing[:2]}, "
+                        f"not in the plan's sample {len(added)} {added[:2]}")
+    gates.append(_gate("sample_matches_plan", not problems, "; ".join(problems)))
 
     # 7. Recomputing from the data and the locked plan gives exactly the stored results.
     again = M.compute(objects, provenance, plan, mission, with_injection=True)
@@ -127,23 +173,31 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
     gates.append(_gate("results_recomputed", not differing,
                        f"results.json differs from a recomputation in: {differing}. Run `ultra evaluate` again; do not edit it"))
 
-    # 8. The Measured section is the program's text, unchanged.
+    # 8. The Measured section, and measured.md itself, are the program's text, unchanged.
     measured = M.measured_markdown(again).strip()
     report = (run / "report.md").read_text(encoding="utf-8") if (run / "report.md").exists() else ""
     sections = report_sections(report)
     headings = [h for h, _ in sections]
     body = dict(sections)
-    gates.append(_gate("measured_is_generated", body.get("Measured", "").strip() == measured,
-                       "the text under '## Measured' must be measured.md, unchanged. Put your own words under '## Inferred'"))
+    on_disk = (run / "measured.md").read_text(encoding="utf-8").strip() if (run / "measured.md").exists() else ""
+    gates.append(_gate("measured_is_generated", body.get("Measured", "").strip() == measured and on_disk == measured,
+                       "measured.md, and the text under '## Measured', must be the program's text, unchanged. "
+                       "Run `ultra evaluate` again and put your own words under '## Inferred'"))
 
-    # 9. The report has the three sections, in order, and keeps objects out of the inferences.
+    # 9. The report is a title and the three sections, in order, in plain Markdown,
+    #    and keeps individual objects out of the inferences.
     problems = []
     if headings != REPORT_SECTIONS:
         problems.append(f"the '## ' headings must be exactly {REPORT_SECTIONS}, in that order; found {headings}")
+    preface = [line for line in report.split("\n## ")[0].splitlines() if line.strip()]
+    if len(preface) > 1 or (preface and not preface[0].startswith("# ")):
+        problems.append("only a one-line '# ' title may come before '## Measured'; put other text in a section")
+    if re.search(r"<[A-Za-z/!]", report):
+        problems.append("HTML is not allowed in the report: it can show a reader headings and text the gates do not see")
     for name in ("Inferred", "Not verified"):
         if not body.get(name, "").strip():
             problems.append(f"'## {name}' is empty")
-    named = sorted(set(OBJECT_ID.findall(body.get("Inferred", ""))))
+    named = sorted(set(OBJECT_ID.findall(_plain(body.get("Inferred", "")))))
     if named:
         problems.append(f"'## Inferred' names objects {named}: an individual object belongs under '## Not verified'")
     gates.append(_gate("report_structure", not problems, "; ".join(problems)))
@@ -165,6 +219,9 @@ def run_gates(run: Path, mission: dict, cache: Path | None = None) -> list[dict]
                 problems.append(f"claim {i}: text and basis must not be empty")
         if claims and not any(isinstance(c, dict) and c.get("kind") == "unverified" for c in claims):
             problems.append("no unverified claim: every run leaves something unchecked")
+        for i, c in enumerate(claims):
+            if isinstance(c, dict) and c.get("kind") == "inferred" and OBJECT_ID.search(_plain(f"{c.get('text')} {c.get('basis')}")):
+                problems.append(f"claim {i}: an inferred claim names an object; individual objects are `unverified`")
     gates.append(_gate("claims_labelled", not problems, "; ".join(problems[:6])))
 
     # 11. Lint for announcement wording in everything the agent wrote.

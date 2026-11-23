@@ -98,9 +98,29 @@ After the rebuild (commit 5392acf), the harness task was given to OpenCode with 
 
 This is the first run by an agent other than Claude Code, and the first with a weaker model. It is one run.
 
+## 5. Second review, by a free model
+
+The same reviewer task was given to OpenCode with the free model, against the rebuilt gates. It ran out of its 30 minutes before writing a report, but left ten edited records and the script that made them. Nine of the ten passed the gates.
+
+| Edit | Why it passed | Now |
+|---|---|---|
+| Relabel the known objects that failed the screen as supernova candidates | `provenance.json` was trusted for roles and labels | `sample_matches_plan`: the sample is derived again from the plan |
+| Drop a whole background stratum before evaluating | same | same |
+| List one object ten times | same | same |
+| Put sentences into the Measured text through a stratum label | labels were free text and were printed | same: labels must be the mission's |
+| Edit `measured.md` only | only the report's copy was compared | the file is compared too |
+| False numbers before the first heading | text before `## Measured` was not read | only a one-line title is allowed there |
+| A second "Measured" heading written in HTML | headings were matched as Markdown only | HTML is not allowed in a report |
+| An object identifier split by Markdown under Inferred | identifiers were matched on raw text | matched after formatting is removed |
+| An object named in an inferred claim | claims were not searched for identifiers | inferred claims may not name objects |
+
+Each is a test. The lesson of the first review was that stored results cannot be trusted; this one showed that the gates still trusted another stored file. What the gates now take as given is the plan, the mission and the data; everything else is derived.
+
+A model far weaker than the one that wrote the gates broke them in half an hour. They should be expected to break again.
+
 ## What has not been measured
 
-- The second version of the gates has not been attacked again.
+- The third version of the gates has not been attacked.
 - Codex and Gemini CLI have not been tried. OpenCode has, once.
 - The bare condition has not been run with a weaker model, so there is still no measurement of whether the harness makes a weaker model more correct, only that such a model can complete a run.
 - No person who is not the author has followed the README.

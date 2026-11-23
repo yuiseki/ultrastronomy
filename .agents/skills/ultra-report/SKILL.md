@@ -14,7 +14,7 @@ Step 6 onwards of `ultra-rediscovery-run`: `results.json` and `measured.md` exis
 
 ## The three sections
 
-`report.md` has exactly these three `## ` headings, in this order. Use `### ` for any sub-heading.
+`report.md` is a one-line `# ` title followed by exactly these three `## ` headings, in this order. Nothing else comes before `## Measured`. Use `### ` for any sub-heading, and plain Markdown only: no HTML.
 
 | Section | Who writes it | Rule |
 |---|---|---|
@@ -33,7 +33,7 @@ A list. Each entry has exactly three keys.
 {"kind": "unverified", "text": "...", "basis": "why it is not checked, or what would check it"}
 ```
 
-There is no `measured` kind: measured statements are the program's. At least one entry must be `unverified`.
+There is no `measured` kind: measured statements are the program's. At least one entry must be `unverified`. An `inferred` entry may not name an object; a statement about one object is `unverified`.
 
 ## Steps
 
