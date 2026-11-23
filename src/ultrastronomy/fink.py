@@ -74,12 +74,25 @@ def _cached(path: Path, fetch):
     return entry
 
 
-def object_alerts(object_id: str, cache: Path, budget: Budget) -> dict:
-    """Cache entry for one object: rows plus where and when they came from."""
+def date_to_jd(iso_date: str) -> float:
+    d = datetime.fromisoformat(iso_date).replace(tzinfo=timezone.utc)
+    return 2440587.5 + d.timestamp() / 86400.0
+
+
+def object_alerts(object_id: str, cache: Path, budget: Budget, until: str) -> dict:
+    """Cache entry for one object: rows plus where and when they came from.
+
+    Alerts after `until` (an ISO date) are dropped and the rest are sorted, so
+    that fetching the same object again later gives the same rows and the same
+    hash even if the object kept alerting.
+    """
     def fetch():
         payload = {"objectId": object_id, "columns": ",".join(COLUMNS)}
-        rows = _post("objects", payload, budget)
-        return {"source": f"{API}/objects", "request": payload, "retrieved_at": now(), "rows": rows}
+        limit = date_to_jd(until)
+        rows = [r for r in _post("objects", payload, budget) if r["i:jd"] < limit]
+        rows.sort(key=lambda r: (r["i:jd"], r.get("i:candid") or 0))
+        return {"source": f"{API}/objects", "request": payload, "until": until,
+                "retrieved_at": now(), "rows": rows}
     return _cached(cache / "objects" / f"{object_id}.json", fetch)
 
 
@@ -89,6 +102,11 @@ def class_week(fink_class: str, start: str, stop: str, cache: Path, budget: Budg
     The server returns the last `n` alerts walking back from `stop`. A week
     with no observing night, and a class label that Fink stopped using, both
     come back as an empty list.
+
+    Because of the cap `n`, a busy class is not sampled over the whole week.
+    `Unknown` has about 100,000 alerts a night, so 3,000 is the tail of the
+    last observed night: a few fields, not a week. Quieter classes reach
+    further back. The strata therefore cover different time spans.
     """
     def fetch():
         payload = {"class": fink_class, "n": n, "startdate": start, "stopdate": stop, "columns": "i:objectId,i:jd"}

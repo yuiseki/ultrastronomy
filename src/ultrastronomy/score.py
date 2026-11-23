@@ -1,12 +1,18 @@
-"""A fixed, literature-based score for "looks like a tidal disruption event".
+"""Screen v1: six yes/no criteria for "looks like a tidal disruption event".
 
-The thresholds follow the photometric selection used for the ZTF TDE sample
+The idea comes from the photometric selection of the ZTF TDE sample
 (van Velzen et al. 2021, ApJ 908, 4): a nuclear transient in a galaxy, blue
-at peak, that does not redden as it fades, and lasts longer than a supernova.
+at peak, that does not redden as it fades. The thresholds here were written
+from memory of that paper and have not been checked against it. `long_lived`
+and `well_sampled` are simplifications of our own, not the paper's rise and
+fade timescales.
 
-The score was written before any light curve of the ground-truth objects was
-looked at, and must stay that way: tuning it on those objects would turn the
-evaluation into a measurement of the tuning.
+Known weaknesses, left in place on purpose: the colour at peak falls back to
+the nearest g/r pair however far away; a single outlier can become the peak;
+`long_lived` has no upper limit, so a source seen over several seasons counts
+as one long flare; the reddening slope is fitted over everything after the
+peak. Fixing these after the known objects have been scored would be tuning.
+A second version needs known objects that were not used to judge this one.
 """
 
 from __future__ import annotations

@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def load_mission(mission_id: str, missions_dir: Path | None = None) -> dict:
     folder = (missions_dir or ROOT / "missions") / mission_id
     mission = read_json(folder / "mission.json")
+    mission["dir"] = folder
     with (folder / mission["ground_truth"]).open(newline="", encoding="utf-8") as fh:
         mission["truth"] = list(csv.DictReader(fh, delimiter="\t"))
     return mission
@@ -39,9 +40,17 @@ def planned_requests(plan: dict, mission: dict) -> int:
     return len(mission["truth"]) + cells + cells * d["per_class"]
 
 
-def fetch_fink(run: Path, plan: dict, mission: dict, cache: Path) -> list[dict]:
+def requests_spent(run: Path) -> int:
+    """Network requests this run has already made, over every earlier attempt."""
+    spent = 0
+    if (run / "log.jsonl").exists():
+        for line in (run / "log.jsonl").read_text(encoding="utf-8").splitlines():
+            spent += __import__("json").loads(line).get("requests_used", 0)
+    return spent
+
+
+def fetch_fink(run: Path, plan: dict, mission: dict, cache: Path, budget: fink.Budget) -> list[dict]:
     """Fetch truth and a background sample. Returns the provenance records."""
-    budget = fink.Budget(plan["data"]["max_requests"])
     d = plan["data"]
     rng = random.Random(d["seed"])
     truth_ids = {t["ztf_id"] for t in mission["truth"]}
@@ -57,13 +66,12 @@ def fetch_fink(run: Path, plan: dict, mission: dict, cache: Path) -> list[dict]:
             todo += [(oid, "background", stratum, week) for oid in picked]
     provenance = []
     for oid, role, label, week in todo:
-        entry = fink.object_alerts(oid, cache, budget)
+        entry = fink.object_alerts(oid, cache, budget, mission["alerts_until"])
         provenance.append({
             "object_id": oid, "role": role, "label": label, "week": week,
             "source": entry["source"], "retrieved_at": entry["retrieved_at"],
             "accessed_at": fink.now(), "sha256": fink.sha256_rows(entry["rows"]), "n_alerts": len(entry["rows"]),
         })
-    log(run, "fetch", requests_used=budget.used, objects=len(provenance))
     return provenance
 
 
@@ -91,21 +99,33 @@ def load_objects(plan: dict, provenance: list[dict], cache: Path) -> dict:
     return objects
 
 
+# Below this many objects on either side the rule gives no verdict. The score
+# interval used here is known to hold its coverage from roughly ten objects up;
+# with two or three it can exclude zero on almost no evidence.
+MIN_OBJECTS = 10
+
+
 def decide(k_pos: int, n_pos: int, k_bg: int, n_bg: int) -> dict:
-    """Apply the fixed rule: positives pass more often than the primary stratum."""
+    """Apply the fixed rule to a difference of pass rates, positives minus background.
+
+    supported: the 95% interval lies above zero. rejected: it lies below zero.
+    undecided: it contains zero, or either side has fewer than MIN_OBJECTS.
+    "No difference seen" is undecided, not rejected.
+    """
     out = {"positives_passed": k_pos, "positives_n": n_pos, "background_passed": k_bg, "background_n": n_bg}
-    if n_pos == 0 or n_bg == 0:
-        return {**out, "difference": None, "ci95_low": None, "ci95_high": None, "verdict": "undecided",
-                "reason": "no objects on one side of the comparison"}
+    if n_pos < MIN_OBJECTS or n_bg < MIN_OBJECTS:
+        d = (k_pos / n_pos - k_bg / n_bg) if n_pos and n_bg else None
+        return {**out, "difference": d, "ci95_low": None, "ci95_high": None, "verdict": "undecided",
+                "reason": f"fewer than {MIN_OBJECTS} objects on one side of the comparison"}
     d, lo, hi = newcombe_difference(k_pos, n_pos, k_bg, n_bg)
-    verdict = "supported" if lo > 0 else "rejected" if d <= 0 else "undecided"
-    return {**out, "difference": d, "ci95_low": lo, "ci95_high": hi, "verdict": verdict}
+    verdict = "supported" if lo > 0 else "rejected" if hi < 0 else "undecided"
+    return {**out, "difference": d, "ci95_low": lo, "ci95_high": hi, "verdict": verdict, "reason": ""}
 
 
 def evaluate(objects: dict, provenance: list[dict], plan: dict, mission: dict) -> dict:
     """Score every object and apply the locked decision rule. Pure function."""
     scored = []
-    for p in provenance:
+    for p in sorted(provenance, key=lambda p: p["object_id"]):
         f = light_curve_features(objects[p["object_id"]])
         scored.append({
             "id": p["object_id"], "role": p["role"], "label": p["label"],
@@ -135,7 +155,6 @@ def evaluate(objects: dict, provenance: list[dict], plan: dict, mission: dict) -
         sum(s["score"] >= rule["threshold"] for s in primary), len(primary))}
     return {
         "data_source": plan["data"]["source"],
-        "computed_at": fink.now(),
         "columns_used": sorted({"i:jd", "i:fid", "i:magpsf", "i:isdiffpos", "i:distpsnr1", "i:sgscore1"}),
         "objects": scored,
         "criteria_met": {name: {
@@ -151,7 +170,10 @@ def evaluate(objects: dict, provenance: list[dict], plan: dict, mission: dict) -
 INJECTION_BINS = [17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0, 20.5]
 
 
-def injection(seed: int, threshold: int, n_per_bin: int = 100) -> dict:
+INJECTIONS_PER_BIN = 100
+
+
+def injection(seed: int, threshold: int, n_per_bin: int = INJECTIONS_PER_BIN) -> dict:
     """Recovery of synthetic TDE-like flares against peak magnitude.
 
     Hosts are injected as nuclear and non-stellar, so this measures what the
@@ -171,3 +193,45 @@ def injection(seed: int, threshold: int, n_per_bin: int = 100) -> dict:
                      "recovery": recovered / n_per_bin, "ci95_low": lo, "ci95_high": hi})
     return {"seed": seed, "threshold": threshold, "cadence_model": synth.CADENCE_MODEL,
             "host": "injected as nuclear (0.2 arcsec) in a non-stellar host", "bins": bins}
+
+
+def compute(objects: dict, provenance: list[dict], plan: dict, mission: dict, with_injection: bool) -> dict:
+    """Everything results.json holds, from data and plan alone. The gates call this again."""
+    results = evaluate(objects, provenance, plan, mission)
+    results["injection"] = injection(plan["data"]["seed"], plan["decision_rule"]["threshold"]) if with_injection else None
+    return results
+
+
+def _share(k: int, n: int) -> str:
+    return f"{k} of {n}"
+
+
+def measured_markdown(results: dict) -> str:
+    """The results as sentences. report.md must carry this text unchanged under '## Measured'."""
+    d = results["decision"]
+    row = next(r for r in results["recall_vs_load"] if r["threshold"] == d["threshold"])
+    synthetic = results["data_source"] == "synthetic"
+    lines = [
+        f"- Data: {'synthetic light curves, generated by formula' if synthetic else 'ZTF alert photometry from the Fink API'}.",
+        f"- Locked rule: score of {d['threshold']} or more; positives against the `{d['primary_stratum']}` stratum.",
+        f"- Positives passing: {_share(d['positives_passed'], d['positives_n'])}. "
+        f"`{d['primary_stratum']}` objects passing: {_share(d['background_passed'], d['background_n'])}.",
+    ]
+    if d["ci95_low"] is None:
+        lines.append(f"- Verdict: {d['verdict']} ({d['reason']}). No interval was computed.")
+    else:
+        lines.append(f"- Difference in pass rates: {d['difference']:+.3f}, 95% interval {d['ci95_low']:+.3f} to {d['ci95_high']:+.3f}.")
+        lines.append(f"- Verdict: {d['verdict']}.")
+    lines.append(f"- All known objects passing at that score, supernova candidates included: {_share(row['truth_kept'], row['truth_n'])}.")
+    for name, cell in row["background"].items():
+        lines.append(f"- `{name}` objects passing at that score: {_share(cell['passed'], cell['n'])}.")
+    none = sum(results["no_positive_detection"].values())
+    n_bg = sum(cell["n"] for cell in row["background"].values())
+    lines.append(f"- Background objects scored: {n_bg}. Of these, {none} had no positive detection and score 0.")
+    inj = results.get("injection")
+    if inj:
+        curve = ", ".join(f"{b['peak_mag']:.1f}: {_share(b['recovered'], b['n'])}" for b in inj["bins"])
+        lines.append(f"- Synthetic flares passing at that score, by peak magnitude, under a model cadence ({inj['cadence_model']}): {curve}.")
+    else:
+        lines.append("- Injection: not run.")
+    return "\n".join(lines) + "\n"

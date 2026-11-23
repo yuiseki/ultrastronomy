@@ -4,9 +4,20 @@
   "question": "With alert photometry and a fixed six-criterion screen, how much of the alert stream would a person have to look at to re-find the nuclear transients that Quintin et al. (2026) reported as overlooked?",
   "ground_truth": "ground_truth.tsv",
   "ground_truth_source": "Quintin et al., Lost and Found: a gallery of overlooked optical nuclear transients from the ZTF archive, A&A 710, A247 (2026), arXiv:2511.19016, table 1, CC BY 4.0",
-  "positive_groups": ["tde", "ant", "ambiguous"],
-  "strata": ["Unknown", "SN candidate", "(SIMBAD) Galaxy", "(SIMBAD) QSO", "(SIMBAD) Seyfert_1"],
+  "positive_groups": [
+    "tde",
+    "ant",
+    "ambiguous"
+  ],
+  "strata": [
+    "Unknown",
+    "SN candidate",
+    "(SIMBAD) Galaxy",
+    "(SIMBAD) QSO",
+    "(SIMBAD) Seyfert_1"
+  ],
   "first_date": "2019-11-01",
   "last_date": "2025-06-30",
-  "data_source": "Fink/ZTF REST API, https://api.ztf.fink-portal.org"
+  "data_source": "Fink/ZTF REST API, https://api.ztf.fink-portal.org",
+  "alerts_until": "2026-11-01"
 }

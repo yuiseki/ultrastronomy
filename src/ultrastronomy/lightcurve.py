@@ -28,7 +28,13 @@ PAIR_DAYS = 1.5
 
 
 def _is_positive(row) -> bool:
-    return str(row.get("i:isdiffpos", "t")).lower() in ("t", "1", "true")
+    # A row without the flag is not counted: an unknown sign is not a brightening.
+    return str(row.get("i:isdiffpos")).lower() in ("t", "1", "true")
+
+
+def _is_usable(row) -> bool:
+    """A positive detection with a magnitude, in g or r. The i band is too sparse to use."""
+    return _is_positive(row) and row.get("i:magpsf") is not None and row.get("i:fid") in (G, R)
 
 
 def _nanmedian(values) -> float:
@@ -56,7 +62,7 @@ def _colour_pairs(jd, fid, mag):
 
 
 def light_curve_features(rows) -> dict | None:
-    rows = [r for r in rows if _is_positive(r) and r.get("i:magpsf") is not None]
+    rows = [r for r in rows if _is_usable(r)]
     if not rows:
         return None
     rows.sort(key=lambda r: r["i:jd"])

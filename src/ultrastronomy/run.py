@@ -1,11 +1,12 @@
 """A run directory: the plan, its lock, where the data came from, what was computed.
 
     plan.json        written by the participant or their agent, before any data
-    plan.lock        hash of the plan and of the scoring code, with a timestamp
+    plan.lock        hash of the plan, of the code and of the mission files, with a timestamp
     provenance.json  every object used: source, retrieval time, content hash
     results.json     numbers computed by this program, never typed by an agent
-    claims.json      statements by the agent, each tagged measured / inferred / unverified
-    report.md        the agent's write-up
+    measured.md      the results as sentences, written by this program
+    claims.json      statements by the agent, each tagged inferred / unverified
+    report.md        measured.md verbatim, then the agent's inferences and what was not verified
     log.jsonl        every harness command that touched the run, failures included
 """
 
@@ -15,7 +16,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from . import lightcurve, score
+from . import score
 from .fink import now
 
 REQUIRED_TEXT = ["claim", "rationale", "failure_interpretation", "seen_before_lock", "ai_budget"]
@@ -38,9 +39,31 @@ def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def code_hashes() -> dict:
-    """Hashes of the modules that turn photometry into a score."""
-    return {name: file_sha256(Path(mod.__file__)) for name, mod in (("score", score), ("lightcurve", lightcurve))}
+def code_hashes(mission_dir: Path | None = None) -> dict:
+    """Hashes of everything that turns a plan into numbers: the package and the mission files."""
+    package = Path(__file__).parent
+    hashes = {p.name: file_sha256(p) for p in sorted(package.glob("*.py"))}
+    if mission_dir:
+        hashes.update({f"mission/{p.name}": file_sha256(p) for p in sorted(mission_dir.iterdir())
+                       if p.suffix in (".json", ".tsv")})
+    return hashes
+
+
+def git_commit() -> str:
+    """The commit of the checkout, so a reviewer can get the same code. Empty outside git."""
+    import subprocess
+    try:
+        out = subprocess.run(["git", "-C", str(Path(__file__).parent), "rev-parse", "HEAD"],
+                             capture_output=True, text=True, timeout=10)
+        return out.stdout.strip() if out.returncode == 0 else ""
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+def parse_time(stamp) -> float:
+    """Seconds since the epoch for a harness timestamp. Raises on anything else."""
+    from datetime import datetime, timezone
+    return datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
 
 
 def new_plan(mission: dict, ai_budget: str, source: str = "fink") -> dict:
@@ -54,7 +77,7 @@ def new_plan(mission: dict, ai_budget: str, source: str = "fink") -> dict:
         "alternative_explanations": [],
         "seen_before_lock": "",
         "ai_budget": ai_budget,
-        "data": {"source": source, "seed": None, "weeks": 3, "per_class": 2, "max_requests": 80},
+        "data": {"source": source, "seed": None, "weeks": 6, "per_class": 2, "max_requests": 130},
     }
 
 
@@ -85,19 +108,22 @@ def lock(run: Path, mission: dict) -> dict:
         raise ValueError("plan is not ready to lock:\n  - " + "\n  - ".join(problems))
     if (run / "plan.lock").exists():
         raise ValueError("plan is already locked. Start a new run to change it.")
-    record = {"plan_sha256": file_sha256(run / "plan.json"), "code_sha256": code_hashes(), "locked_at": now()}
+    record = {"plan_sha256": file_sha256(run / "plan.json"), "code_sha256": code_hashes(mission["dir"]),
+              "git_commit": git_commit(), "locked_at": now()}
     write_json(run / "plan.lock", record)
     log(run, "lock", **record)
     return record
 
 
-def require_lock(run: Path) -> dict:
+def require_lock(run: Path, mission: dict) -> dict:
     """The lock, after checking that neither the plan nor the code moved since."""
     if not (run / "plan.lock").exists():
         raise ValueError("plan is not locked. Run `ultra lock` before touching data.")
     record = read_json(run / "plan.lock")
     if file_sha256(run / "plan.json") != record["plan_sha256"]:
         raise ValueError("plan.json changed after it was locked. Start a new run instead.")
-    if code_hashes() != record["code_sha256"]:
-        raise ValueError("score.py or lightcurve.py changed after the plan was locked.")
+    changed = sorted(k for k, v in code_hashes(mission["dir"]).items() if record["code_sha256"].get(k) != v)
+    if changed:
+        raise ValueError(f"changed since the plan was locked: {changed}. "
+                         f"Check out commit {record.get('git_commit') or '(unknown)'} or start a new run.")
     return record

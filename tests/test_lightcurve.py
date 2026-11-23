@@ -90,3 +90,17 @@ def test_missing_host_columns_become_nan():
     f = light_curve_features(flare(1, 0, 20, 80))
     assert math.isnan(f["dist_ps1"])
     assert math.isnan(f["sgscore"])
+
+
+def test_a_row_without_a_sign_is_not_a_detection():
+    # Review finding S5(f): an unknown sign used to count as a brightening.
+    rows = flare(1, 0, 20, 80) + [{"i:jd": 50, "i:fid": 1, "i:magpsf": 15.0, "i:sigmapsf": 0.05}]
+    assert light_curve_features(rows)["peak_mag"] == pytest.approx(18.0)
+
+
+def test_the_i_band_is_not_used():
+    # Review finding S5(d).
+    rows = flare(1, 0, 20, 80) + [alert(300, 3, 14.0)]
+    f = light_curve_features(rows)
+    assert f["peak_mag"] == pytest.approx(18.0)
+    assert f["n_det"] == 21

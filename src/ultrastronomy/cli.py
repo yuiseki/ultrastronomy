@@ -7,18 +7,25 @@ import json
 import os
 import shutil
 import sys
+from collections import Counter
 from pathlib import Path
 
+from . import fink
 from . import mission as M
 from .gates import run_gates
 from .intervals import wilson
 from .run import lock, log, new_plan, plan_problems, read_json, require_lock, write_json
 
-SHARED = ["plan.json", "plan.lock", "provenance.json", "results.json", "claims.json", "report.md"]
+SHARED = ["plan.json", "plan.lock", "log.jsonl", "provenance.json", "results.json", "measured.md",
+          "claims.json", "report.md"]
 
 
 def cache_dir() -> Path:
     return Path(os.environ.get("ULTRA_CACHE", ".cache/fink"))
+
+
+def _mission_of(run: Path) -> dict:
+    return M.load_mission(read_json(run / "plan.json")["mission"])
 
 
 def _pct(k, n):
@@ -26,22 +33,14 @@ def _pct(k, n):
 
 
 def print_results(results: dict) -> None:
-    d = results["decision"]
     strata = sorted(results["recall_vs_load"][0]["background"])
-    print(f"data source: {results['data_source']}")
-    print("\nscore >=  known objects   " + "   ".join(strata))
+    print("score >=  positives      all known      " + "   ".join(strata))
     for row in results["recall_vs_load"]:
         cells = "   ".join(_pct(row["background"][s]["passed"], row["background"][s]["n"]).ljust(len(s)) for s in strata)
-        print(f"   {row['threshold']}      {_pct(row['truth_kept'], row['truth_n']).ljust(14)}  {cells}")
-    print(f"\nlocked rule: score >= {d['threshold']}, positives against the '{d['primary_stratum']}' stratum")
-    print(f"  positives passing: {_pct(d['positives_passed'], d['positives_n'])}")
-    print(f"  background passing: {_pct(d['background_passed'], d['background_n'])}")
-    if d["difference"] is not None:
-        print(f"  difference {d['difference']:+.3f}, 95% interval {d['ci95_low']:+.3f} to {d['ci95_high']:+.3f}")
-    print(f"  verdict: {d['verdict']}")
-    if results.get("injection"):
-        print("\ninjected TDE-like flares recovered, by peak magnitude (" + results["injection"]["cadence_model"] + "):")
-        print("  " + "  ".join(f"{b['peak_mag']:.1f}: {100 * b['recovery']:.0f}%" for b in results["injection"]["bins"]))
+        print(f"   {row['threshold']}      {_pct(row['positives_kept'], row['positives_n']).ljust(14)} "
+              f"{_pct(row['truth_kept'], row['truth_n']).ljust(14)} {cells}")
+    print("\n'positives' are the known objects the rule is about; 'all known' adds the supernova candidates.\n")
+    print(M.measured_markdown(results))
 
 
 def cmd_init(a) -> int:
@@ -59,130 +58,169 @@ def cmd_init(a) -> int:
 
 def cmd_lock(a) -> int:
     run = Path(a.run)
-    mission = M.load_mission(read_json(run / "plan.json")["mission"])
+    mission = _mission_of(run)
+    plan = read_json(run / "plan.json")
     try:
+        if not plan_problems(plan, mission) and plan["data"]["source"] == "fink":
+            needed = M.planned_requests(plan, mission)
+            if needed > plan["data"]["max_requests"]:
+                raise ValueError(f"this plan can need {needed} requests but `data.max_requests` is "
+                                 f"{plan['data']['max_requests']}. Raise the budget or sample less.")
         record = lock(run, mission)
     except ValueError as e:
         log(run, "lock_refused", reason=str(e))
         print(e, file=sys.stderr)
         return 1
-    print(f"locked at {record['locked_at']}. The plan and the scoring code are now fixed for this run.")
+    print(f"locked at {record['locked_at']}. The plan, the code and the mission files are now fixed for this run.")
     return 0
 
 
 def cmd_fetch(a) -> int:
     run = Path(a.run)
+    mission = _mission_of(run)
     try:
-        require_lock(run)
+        require_lock(run, mission)
     except ValueError as e:
+        log(run, "fetch_refused", reason=str(e))
         print(e, file=sys.stderr)
         return 1
     plan = read_json(run / "plan.json")
-    mission = M.load_mission(plan["mission"])
     if plan["data"]["source"] == "synthetic":
-        provenance, _ = M.fetch_synthetic(plan)
-        write_json(run / "provenance.json", provenance)
+        write_json(run / "provenance.json", M.fetch_synthetic(plan)[0])
+        log(run, "fetch", requests_used=0)
         return 0
-    planned = M.planned_requests(plan, mission)
-    print(f"this plan needs at most {planned} requests to the Fink API (about {planned * 4 // 60 + 1} minutes); "
-          f"the budget in plan.json is {plan['data']['max_requests']}. Cached objects cost nothing.")
+    planned, spent = M.planned_requests(plan, mission), M.requests_spent(run)
+    left = plan["data"]["max_requests"] - spent
+    print(f"this plan needs at most {planned} requests to the Fink API (about {planned * 4 // 60 + 1} minutes). "
+          f"Budget: {plan['data']['max_requests']}, already used by this run: {spent}. Cached objects cost nothing.")
     if not a.confirm:
         print("nothing was fetched. Re-run with --confirm to go ahead.")
         return 0
+    budget = fink.Budget(max(left, 0))
     try:
-        provenance = M.fetch_fink(run, plan, mission, cache_dir())
+        provenance = M.fetch_fink(run, plan, mission, cache_dir(), budget)
     except Exception as e:  # network errors and the budget: record, never paper over
-        log(run, "fetch_failed", error=f"{type(e).__name__}: {e}")
-        print(f"fetch failed: {type(e).__name__}: {e}", file=sys.stderr)
+        log(run, "fetch_failed", error=f"{type(e).__name__}: {e}", requests_used=budget.used)
+        print(f"fetch failed after {budget.used} requests: {type(e).__name__}: {e}", file=sys.stderr)
         return 1
     write_json(run / "provenance.json", provenance)
-    print(f"fetched {len(provenance)} objects. Next: `ultra evaluate {run}`.")
+    log(run, "fetch", requests_used=budget.used, objects=len(provenance))
+    got = Counter(p["label"] for p in provenance if p["role"] == "background")
+    want = plan["data"]["weeks"] * plan["data"]["per_class"]
+    print(f"fetched {len(provenance)} objects with {budget.used} requests. Background objects per stratum (asked for {want}):")
+    for stratum in mission["strata"]:
+        note = "" if got[stratum] == want else "   <- fewer than asked: some weeks returned nothing for this class"
+        print(f"  {stratum}: {got[stratum]}{note}")
+    print("An empty week is usually a week without observations, or a class label Fink no longer uses. "
+          f"The weeks are in {run}/log.jsonl.\nNext: `ultra evaluate {run}`.")
     return 0
 
 
 def cmd_evaluate(a) -> int:
     run = Path(a.run)
     try:
-        require_lock(run)
+        mission = _mission_of(run)
+        require_lock(run, mission)
         plan = read_json(run / "plan.json")
-        mission = M.load_mission(plan["mission"])
         provenance = read_json(run / "provenance.json")
         objects = M.load_objects(plan, provenance, cache_dir())
     except (ValueError, FileNotFoundError) as e:
         log(run, "evaluate_failed", error=str(e))
         print(e, file=sys.stderr)
         return 1
-    results = M.evaluate(objects, provenance, plan, mission)
-    if (run / "results.json").exists():  # keep an injection that was already run
-        results["injection"] = read_json(run / "results.json").get("injection")
+    results = M.compute(objects, provenance, plan, mission, with_injection=True)
     write_json(run / "results.json", results)
+    (run / "measured.md").write_text(M.measured_markdown(results), encoding="utf-8")
     log(run, "evaluate", verdict=results["decision"]["verdict"])
     print_results(results)
+    print(f"The sentences above are in {run}/measured.md. Next: write claims.json and report.md.")
     return 0
 
 
-def cmd_inject(a) -> int:
-    run = Path(a.run)
-    try:
-        require_lock(run)
-        results = read_json(run / "results.json")
-    except (ValueError, FileNotFoundError) as e:
-        print(e, file=sys.stderr)
-        return 1
-    plan = read_json(run / "plan.json")
-    results["injection"] = M.injection(plan["data"]["seed"], plan["decision_rule"]["threshold"])
-    write_json(run / "results.json", results)
-    log(run, "inject")
-    print_results(results)
-    return 0
-
-
-def cmd_gates(a) -> int:
-    run = Path(a.run)
-    mission = M.load_mission(read_json(run / "plan.json")["mission"])
-    gates = run_gates(run, mission, cache_dir())
-    log(run, "gates", failed=[g["gate"] for g in gates if not g["passed"]])
+def _print_gates(gates) -> int:
     for g in gates:
         print(("PASS  " if g["passed"] else "FAIL  ") + g["gate"] + ("" if g["passed"] else f": {g['detail']}"))
     return 0 if all(g["passed"] for g in gates) else 1
 
 
+def cmd_gates(a) -> int:
+    run = Path(a.run)
+    gates = run_gates(run, _mission_of(run), cache_dir())
+    log(run, "gates", failed=[g["gate"] for g in gates if not g["passed"]])
+    return _print_gates(gates)
+
+
+def cmd_verify(a) -> int:
+    """Check someone else's record, with data fetched again by this machine."""
+    record = Path(a.record)
+    mission = _mission_of(record)
+    cache = cache_dir()
+    if a.refetch:
+        provenance = read_json(record / "provenance.json")
+        cache = Path(".cache/verify") / record.name
+        print(f"re-fetching {len(provenance)} objects into {cache} (at most {len(provenance)} requests).")
+        if not a.confirm:
+            print("nothing was fetched. Re-run with --confirm to go ahead.")
+            return 0
+        budget = fink.Budget(len(provenance))
+        for p in provenance:
+            fink.object_alerts(p["object_id"], cache, budget, mission["alerts_until"])
+    return _print_gates(run_gates(record, mission, cache))
+
+
 def cmd_status(a) -> int:
     run = Path(a.run)
-    steps = [
-        ("plan.json", "write the plan", f"edit {run}/plan.json"),
-        ("plan.lock", "lock the plan", f"ultra lock {run}"),
-        ("provenance.json", "fetch the data", f"ultra fetch {run} --confirm"),
-        ("results.json", "score and decide", f"ultra evaluate {run}"),
-    ]
-    for name, label, command in steps:
-        if not (run / name).exists():
-            print(f"next: {label}  ->  {command}")
-            return 0
-        print(f"done: {label}")
-    results = read_json(run / "results.json")
-    if not results.get("injection"):
-        print(f"next: measure sensitivity  ->  ultra inject {run}")
+    if not (run / "plan.json").exists():
+        print(f"next: start a run  ->  ultra init {run.name} --ai-budget \"...\"")
         return 0
-    print("done: measure sensitivity")
-    for name in ("claims.json", "report.md"):
-        if not (run / name).exists():
-            print(f"next: write {run}/{name} (see the ultra-report skill)")
-            return 0
-    print(f"next: check the record  ->  ultra gates {run}")
+    mission = _mission_of(run)
+    plan = read_json(run / "plan.json")
+    if not (run / "plan.lock").exists():
+        problems = plan_problems(plan, mission)
+        if problems:
+            print(f"next: fill in {run}/plan.json (see the ultra-plan skill). Still to do:")
+            for p in problems:
+                print(f"  - {p}")
+        else:
+            print(f"done: write the plan\nnext: lock it  ->  ultra lock {run}")
+        return 0
+    print("done: write and lock the plan")
+    if not (run / "provenance.json").exists():
+        print(f"next: fetch the data  ->  ultra fetch {run}   (shows the request count; add --confirm to go ahead)")
+        return 0
+    print("done: fetch the data")
+    if not (run / "results.json").exists():
+        print(f"next: score and decide  ->  ultra evaluate {run}")
+        return 0
+    print("done: score, decide and measure sensitivity")
+    missing = [n for n in ("claims.json", "report.md") if not (run / n).exists()]
+    if missing:
+        print(f"next: write {' and '.join(missing)} in {run}/ (see the ultra-report skill)")
+        return 0
+    failed = [g["gate"] for g in run_gates(run, mission, cache_dir()) if not g["passed"]]
+    if failed:
+        print(f"next: fix what the gates name  ->  ultra gates {run}   (failing: {', '.join(failed)})")
+        return 0
+    print("done: the record passes every gate")
+    exported = Path(a.contributions_dir) / run.name
+    if plan["data"]["source"] != "fink":
+        print("this is a synthetic run: a demo, not a contribution. Nothing more to do.")
+    elif not exported.exists():
+        print(f"next: copy the record for sharing  ->  ultra export {run}")
+    else:
+        print(f"done: exported to {exported}. Sharing it (commit, pull request) is the person's decision.")
     return 0
 
 
 def cmd_export(a) -> int:
     run = Path(a.run)
     plan = read_json(run / "plan.json")
-    mission = M.load_mission(plan["mission"])
-    failed = [g["gate"] for g in run_gates(run, mission, cache_dir()) if not g["passed"]]
-    if failed:
-        print(f"not exported: gates failed: {failed}", file=sys.stderr)
-        return 1
     if plan["data"]["source"] != "fink":
         print("not exported: a synthetic run is a demo, not a contribution", file=sys.stderr)
+        return 1
+    failed = [g["gate"] for g in run_gates(run, _mission_of(run), cache_dir()) if not g["passed"]]
+    if failed:
+        print(f"not exported: gates failed: {failed}", file=sys.stderr)
         return 1
     dest = Path(a.contributions_dir) / run.name
     if dest.exists():
@@ -191,12 +229,17 @@ def cmd_export(a) -> int:
     dest.mkdir(parents=True)
     for name in SHARED:
         shutil.copy(run / name, dest / name)
-    print(f"copied the record to {dest}. Commit it and open a pull request.")
+    log(run, "export", to=str(dest))
+    print(f"copied the record to {dest}. It holds no raw data. Ask the person before committing or opening a pull request.")
     return 0
 
 
 def pool(contributions: Path) -> dict:
-    """Pass rates over every contributed run, each background object counted once."""
+    """Pass rates over every contributed run, each background object counted once.
+
+    Pooling trusts the records it is given. Records enter `contributions/`
+    through review, where `ultra verify --refetch` recomputes them.
+    """
     seen, runs, rows = set(), 0, []
     for results_path in sorted(contributions.glob("*/results.json")):
         results = read_json(results_path)
@@ -221,8 +264,7 @@ def pool(contributions: Path) -> dict:
 
 
 def cmd_pool(a) -> int:
-    result = pool(Path(a.contributions_dir))
-    print(json.dumps(result, indent=2))
+    print(json.dumps(pool(Path(a.contributions_dir)), indent=2))
     return 0
 
 
@@ -239,35 +281,36 @@ def cmd_demo(a) -> int:
         "decision_rule": {"threshold": 5, "primary_stratum": "Unknown"},
         "rationale": "Demo values. In a real run you choose these before looking at data and say why.",
         "failure_interpretation": "The screen does not separate even idealised flares; fix the pipeline before using real data.",
-        "alternative_explanations": ["The synthetic classes were written by the same people as the screen."],
+        "alternative_explanations": ["The synthetic classes were written by the same people as the screen, "
+                                     "and the Unknown class is built from objects the criteria exclude almost by construction."],
         "seen_before_lock": "Nothing: the data is generated after the lock.",
     })
     plan["data"]["seed"] = a.seed
     write_json(run / "plan.json", plan)
-    assert not plan_problems(plan, mission)
+    log(run, "init", mission="demo")
     lock(run, mission)
     provenance, objects = M.fetch_synthetic(plan)
     write_json(run / "provenance.json", provenance)
-    results = M.evaluate(objects, provenance, plan, mission)
-    results["injection"] = M.injection(a.seed, 5)
+    log(run, "fetch", requests_used=0)
+    results = M.compute(objects, provenance, plan, mission, with_injection=True)
     write_json(run / "results.json", results)
-    d = results["decision"]
+    measured = M.measured_markdown(results)
+    (run / "measured.md").write_text(measured, encoding="utf-8")
+    log(run, "evaluate", verdict=results["decision"]["verdict"])
     write_json(run / "claims.json", [
-        {"kind": "measured", "text": "Verdict of the locked rule.", "evidence": "/decision/verdict", "value": d["verdict"]},
-        {"kind": "measured", "text": "Synthetic flares scoring 5 or more.", "evidence": "/decision/positives_passed", "value": d["positives_passed"]},
-        {"kind": "unverified", "text": "Whether any of this holds on the real sky.", "basis": "The demo never touches real data."},
+        {"kind": "inferred", "text": "The pipeline runs end to end and separates idealised classes.",
+         "basis": "The verdict and table in measured.md. The classes are synthetic, so this says nothing about the sky."},
+        {"kind": "unverified", "text": "Whether any of this holds on real data.",
+         "basis": "The demo never touches real data."},
     ])
     (run / "report.md").write_text(
-        "# Demo run on synthetic data\n\n## Measured\n\n"
-        f"- Verdict of the locked rule: {d['verdict']}.\n"
-        f"- {d['positives_passed']} of {d['positives_n']} synthetic flares score 5 or more, against "
-        f"{d['background_passed']} of {d['background_n']} objects in the Unknown stratum.\n\n"
-        "## Inferred\n\nNothing.\n\n## Not verified\n\n"
-        "- Everything about the real sky. Every light curve here comes from a formula.\n", encoding="utf-8")
+        "# Demo run on synthetic data\n\n## Measured\n\n" + measured +
+        "\n## Inferred\n\nThe pipeline runs end to end and separates idealised classes. That is all a demo can show.\n\n"
+        "## Not verified\n\n- Everything about the real sky. Every light curve here comes from a formula.\n", encoding="utf-8")
     print("ultrastronomy demo: every light curve below is synthetic.\n")
     print_results(results)
     gates = run_gates(run, mission)
-    print("\ngates: " + ", ".join(("ok " if g["passed"] else "FAILED ") + g["gate"] for g in gates))
+    print("gates: " + ", ".join(("ok " if g["passed"] else "FAILED ") + g["gate"] for g in gates))
     print(f"\nThe full record is in {run}/. A real run follows the same steps on ZTF alerts: see AGENTS.md.")
     return 0 if all(g["passed"] for g in gates) else 1
 
@@ -290,20 +333,29 @@ def main(argv=None) -> int:
     s.set_defaults(fn=cmd_init)
 
     for name, fn, text in [
-        ("lock", cmd_lock, "freeze the plan and the scoring code"),
-        ("evaluate", cmd_evaluate, "score every object and apply the locked rule"),
-        ("inject", cmd_inject, "measure sensitivity with injected synthetic flares"),
-        ("gates", cmd_gates, "check the record; exit 1 if any gate fails"),
-        ("status", cmd_status, "show what is done and what comes next"),
+        ("lock", cmd_lock, "freeze the plan, the code and the mission files"),
+        ("evaluate", cmd_evaluate, "score every object, apply the locked rule, measure sensitivity"),
+        ("gates", cmd_gates, "recompute and check the record; exit 1 if any gate fails"),
     ]:
         s = sub.add_parser(name, help=text)
         s.add_argument("run")
         s.set_defaults(fn=fn)
 
+    s = sub.add_parser("status", help="show what is done and what comes next")
+    s.add_argument("run")
+    s.add_argument("--contributions-dir", default="contributions")
+    s.set_defaults(fn=cmd_status)
+
     s = sub.add_parser("fetch", help="download the data the locked plan asks for")
     s.add_argument("run")
     s.add_argument("--confirm", action="store_true", help="without this, only the request count is shown")
     s.set_defaults(fn=cmd_fetch)
+
+    s = sub.add_parser("verify", help="check a shared record, optionally with data fetched again")
+    s.add_argument("record")
+    s.add_argument("--refetch", action="store_true", help="download the record's objects again and compare")
+    s.add_argument("--confirm", action="store_true", help="without this, only the request count is shown")
+    s.set_defaults(fn=cmd_verify)
 
     s = sub.add_parser("export", help="copy a run that passed the gates into contributions/")
     s.add_argument("run")
