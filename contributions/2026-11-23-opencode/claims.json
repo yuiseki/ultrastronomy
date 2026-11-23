@@ -1,0 +1,47 @@
+[
+  {
+    "kind": "inferred",
+    "text": "In this sample the screen kept about three quarters of the known positives (14 of 19) and none of the 12 Unknown background objects, so the locked rule returned supported.",
+    "basis": "measured.md: positives passing 14 of 19, Unknown 0 of 12, difference +0.737 with 95% interval +0.406 to +0.882, verdict supported."
+  },
+  {
+    "kind": "inferred",
+    "text": "Background objects that passed the screen were concentrated in the Seyfert_1 and QSO strata (5 of 12 and 2 of 12), while the Galaxy, SN candidate and Unknown strata let far fewer through at this threshold.",
+    "basis": "measured.md pass counts by stratum at score >= 5: Seyfert_1 5 of 12, QSO 2 of 12, Galaxy 1 of 8, SN candidate 0 of 12, Unknown 0 of 12."
+  },
+  {
+    "kind": "inferred",
+    "text": "A large part of the background scored zero for lack of a positive subtraction rather than for a colour or duration check: 20 of the 56 scored background objects had no positive detection.",
+    "basis": "measured.md: background objects scored 56, of which 20 had no positive detection and score 0; ultra-alert-photometry notes that rows without a positive sign are ignored, so an object with no positive rows scores 0."
+  },
+  {
+    "kind": "inferred",
+    "text": "The synthetic flare test shows the screen keeping ideal flares well down to about magnitude 19 and degrading below that, but this is a property of the model cadence and ideal hosts, not a measurement on the real sky.",
+    "basis": "measured.md injection line at score >= 5: 19.0 keeps 79 of 100, 19.5 keeps 47 of 100, 20.0 keeps 20 of 100, 20.5 keeps 0 of 100, under the stated model cadence."
+  },
+  {
+    "kind": "unverified",
+    "text": "Whether any object is what its label says. The screen scores alert photometry and does not classify anything.",
+    "basis": "The six criteria are photometric cuts; classification needs a spectrum, which this run does not take."
+  },
+  {
+    "kind": "unverified",
+    "text": "Every background object that passed the screen was left unexamined; the run says nothing about what any of them is.",
+    "basis": "The background side is only counted, not inspected; identifiers are listed under 'Not verified' in report.md."
+  },
+  {
+    "kind": "unverified",
+    "text": "Why the (SIMBAD) Galaxy stratum returned nothing for two sampled weeks; the cause is not known.",
+    "basis": "log.jsonl shows available 0 for that stratum in the weeks of 2022-10-29 and 2023-03-26; the harness does not explain why."
+  },
+  {
+    "kind": "unverified",
+    "text": "Sensitivity on the real sky. The injection uses ideal flares in ideal hosts on a made-up observing schedule.",
+    "basis": "The measured.md injection sentence states the model cadence and limiting magnitude; no real-sky sensitivity was measured."
+  },
+  {
+    "kind": "unverified",
+    "text": "The positive side is the same known objects as in every other run, selected for looking like this, so this run does not independently replicate the recall.",
+    "basis": "mission.json lists one fixed ground_truth.tsv used by every run; only the background weeks change with the seed."
+  }
+]

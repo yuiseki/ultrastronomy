@@ -61,7 +61,7 @@ When the gates pass, `uv run ultra export runs/<name>` copies the record (no raw
 ## Status
 
 - Review: an independent agent got 24 of 31 tampered records through the first version of the gates. The gates were rebuilt around recomputation and each of those cases is now a test. What a determined forger can still do is listed in [docs/design.md](docs/design.md).
-- Agents: exercised with Claude Code subagents only. The skills follow the [Agent Skills specification](https://agentskills.io/specification) and the entry point is a plain `AGENTS.md`, but Codex, Gemini CLI and OpenCode have not been tried. `CLAUDE.md` and `.claude/skills` only point Claude Code at `AGENTS.md` and `.agents/skills`; they hold nothing of their own.
+- Agents: a full run has been completed by a Claude Code subagent and by OpenCode with a free model, once each. Codex and Gemini CLI have not been tried. The skills follow the [Agent Skills specification](https://agentskills.io/specification) and the entry point is a plain `AGENTS.md`. `CLAUDE.md` and `.claude/skills` only point Claude Code at `AGENTS.md` and `.agents/skills`; they hold nothing of their own.
 - Missions: one.
 - Injection: uses a simplified model of when ZTF observes, not the real schedule, and ideal hosts.
 - Screen: version 1 has known weaknesses, listed in `src/ultrastronomy/score.py`, and its thresholds have not been checked against the paper they are modelled on.

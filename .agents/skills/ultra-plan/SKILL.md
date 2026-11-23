@@ -17,7 +17,7 @@ Step 2 of `ultra-rediscovery-run`: `runs/<name>/plan.json` exists and is empty.
 - `missions/<mission>/mission.json`: the question, the strata, where the known objects come from.
 - `missions/<mission>/README.md`: what earlier runs found. You may read it. Say so in `seen_before_lock`.
 
-Do not open cached light curves, `results.json` of this run, or any data file before the lock. The demo's output is synthetic and may be looked at; mention it in `seen_before_lock`.
+Do not open cached light curves (anything under `.cache/`), `results.json` of this run, or any data file before the lock. The demo's output is synthetic and may be looked at; mention it in `seen_before_lock`.
 
 Leave `mission`, `kind` and `data.source` as `ultra init` wrote them.
 

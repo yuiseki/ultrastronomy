@@ -86,10 +86,22 @@ What it showed, and what was done:
 
 The review's summary of the first version was that the gates stop carelessness and not intent. That is still true and is now what the documentation says.
 
+## 4. The rebuilt version, with a different agent and a weaker model
+
+After the rebuild (commit 5392acf), the harness task was given to OpenCode with a free model (`opencode/deepseek-v4.1-flash-free`), in a container, using the runner from Geo-Ref-skills. It had `AGENTS.md`, the skills and the code, and nothing from this directory. Codex was meant to run the same task; its login for evals had expired, so it did not run.
+
+- It finished every step in about 15 minutes and passed all 12 gates. The record is `contributions/2026-11-23-opencode/`.
+- The first `ultra fetch` failed with HTTP 502 after 84 requests. It ran the command again; the retry needed 26 more, and both attempts were counted against the budget of 130.
+- Its report listed all eight background objects that passed under "Not verified", and said by itself that the positive side is not replicated by a new run.
+- The record was then checked with `ultra verify --refetch`: the 79 objects were downloaded again, the hashes matched, and the recomputed results equalled the stored ones.
+- It reported eleven unclear instructions. Two changed the repository: the rules in `AGENTS.md` were numbered out of order, and nothing said whether a failed fetch may be retried.
+
+This is the first run by an agent other than Claude Code, and the first with a weaker model. It is one run.
+
 ## What has not been measured
 
 - The second version of the gates has not been attacked again.
-- No agent other than Claude Code subagents has been tried.
-- No weaker or cheaper model has been tried, which is where a harness would be expected to matter most for correctness.
+- Codex and Gemini CLI have not been tried. OpenCode has, once.
+- The bare condition has not been run with a weaker model, so there is still no measurement of whether the harness makes a weaker model more correct, only that such a model can complete a run.
 - No person who is not the author has followed the README.
 - Each condition was run once.

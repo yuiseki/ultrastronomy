@@ -1,0 +1,26 @@
+{
+  "mission": "ztf-nuclear-transients",
+  "kind": "replication",
+  "claim": "At score >= 5, the known nuclear transients pass more often than objects in the Unknown stratum.",
+  "decision_rule": {
+    "threshold": 5,
+    "primary_stratum": "Unknown"
+  },
+  "rationale": "Same threshold and primary stratum as the earlier run recorded in missions/ztf-nuclear-transients/README.md, applied to a new sample of weeks. Unknown is the bulk of the real alert stream, so it is the background that matters most for inspection load.",
+  "failure_interpretation": "On this sample the screen does not separate the known objects from the Unknown stratum. I will not change the threshold, the primary stratum, the seed or the objects to recover the claim.",
+  "alternative_explanations": [
+    "Circularity: the known objects were selected by a TDE classifier and by eye for looking like this, and the threshold of 5 was chosen after their scores had been seen. The positive side is the same objects in every run and is not independently replicated here; this run repeats the background side.",
+    "Chance: about 12 background objects per class and 19 positives make the intervals wide.",
+    "Sampling: a stratum is drawn from the last 3000 alerts of its class in the sampled week, so a busy class such as Unknown covers only the tail of one night and objects that alert often are over-represented.",
+    "Observation effort: detection counts and duration depend on how often a field was observed, not only on the object."
+  ],
+  "seen_before_lock": "The mission README, including the earlier run's table at score >= 5 and its stated known limits. The demo output on synthetic light curves. The plan (not data) of contributions/2026-11-23-first, which uses seed 2207. No data of this run.",
+  "ai_budget": "About 25 minutes of agent work; a small run is fine. Stop after ultra export.",
+  "data": {
+    "source": "fink",
+    "seed": 734211,
+    "weeks": 6,
+    "per_class": 2,
+    "max_requests": 130
+  }
+}

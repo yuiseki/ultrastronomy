@@ -50,7 +50,8 @@ After step 4, look at the counts per stratum that `fetch` prints. Fewer objects 
 - Looking at the data first and writing the plan afterwards. The harness refuses to fetch before the lock, but a cache from an earlier run may be on disk. Do not open it.
 - Changing the threshold, the stratum or the seed after seeing the table, to get a nicer verdict. Start a new run instead and say in its plan what you had already seen.
 - Treating a failed fetch as an empty result. A network error stops `fetch` with exit code 1 and a `fetch_failed` line in `log.jsonl`. A week with no alerts does not: it shows as `"available": 0` in a `sample` line.
-- Going past the budget. When the budget is reached, stop, write what is done, and say what the next step would be.
+- Giving up, or starting over, after one network error. Run `ultra fetch runs/<name> --confirm` again: what was downloaded is cached and costs nothing, and the requests of every attempt count against `data.max_requests`. If the budget runs out, stop and report; the plan is locked, so more requests means a new run. Mention the failed attempt under "Not verified".
+- Going past the budget. No command watches the person's time or usage limit; you do. When it is reached, stop, write what is done, and say what the next step would be.
 
 ## Verification
 
