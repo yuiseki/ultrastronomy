@@ -1,0 +1,471 @@
+{
+  "data_source": "irsa",
+  "objects": [
+    {
+      "id": "VSX-1502778",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 133,
+      "cat_period": 2.48081,
+      "period": 0.101374,
+      "log10_fap": -0.142,
+      "match": "none"
+    },
+    {
+      "id": "VSX-1565451",
+      "role": "truth",
+      "label": "catalogued, found by ZTF",
+      "n_points": 807,
+      "cat_period": 6.2347465,
+      "period": 6.23175,
+      "log10_fap": -24.583,
+      "match": "exact"
+    },
+    {
+      "id": "VSX-1566158",
+      "role": "truth",
+      "label": "catalogued, found by ZTF",
+      "n_points": 807,
+      "cat_period": 0.6660061,
+      "period": 0.666012,
+      "log10_fap": -116.462,
+      "match": "exact"
+    },
+    {
+      "id": "VSX-1624917",
+      "role": "truth",
+      "label": "catalogued, found by ZTF",
+      "n_points": 773,
+      "cat_period": 5.8679393,
+      "period": 5.858057,
+      "log10_fap": -72.578,
+      "match": "exact"
+    },
+    {
+      "id": "VSX-1625119",
+      "role": "truth",
+      "label": "catalogued, found by ZTF",
+      "n_points": 773,
+      "cat_period": 0.3644466,
+      "period": 0.182222,
+      "log10_fap": -137.632,
+      "match": "harmonic"
+    },
+    {
+      "id": "VSX-1718742",
+      "role": "truth",
+      "label": "catalogued, found by ZTF",
+      "n_points": 948,
+      "cat_period": 0.2423968,
+      "period": 0.121198,
+      "log10_fap": -163.377,
+      "match": "harmonic"
+    },
+    {
+      "id": "VSX-1876785",
+      "role": "truth",
+      "label": "catalogued, found by ZTF",
+      "n_points": 1267,
+      "cat_period": 0.4785346,
+      "period": 0.478462,
+      "log10_fap": -67.005,
+      "match": "exact"
+    },
+    {
+      "id": "VSX-1892910",
+      "role": "truth",
+      "label": "catalogued, found by ZTF",
+      "n_points": 788,
+      "cat_period": 0.3964458,
+      "period": 0.198226,
+      "log10_fap": -146.454,
+      "match": "harmonic"
+    },
+    {
+      "id": "VSX-1894481",
+      "role": "truth",
+      "label": "catalogued, found by ZTF",
+      "n_points": 1116,
+      "cat_period": 0.4323994,
+      "period": 0.216201,
+      "log10_fap": -170.755,
+      "match": "harmonic"
+    },
+    {
+      "id": "VSX-2660620",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 806,
+      "cat_period": 1.3141,
+      "period": 2.299593,
+      "log10_fap": -3.493,
+      "match": "none"
+    },
+    {
+      "id": "VSX-2662634",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 807,
+      "cat_period": 2.24587,
+      "period": 1.122905,
+      "log10_fap": -7.294,
+      "match": "harmonic"
+    },
+    {
+      "id": "VSX-2685256",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 79,
+      "cat_period": 0.50996,
+      "period": 0.258412,
+      "log10_fap": 0.0,
+      "match": "none"
+    },
+    {
+      "id": "VSX-2686047",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 562,
+      "cat_period": 3.97652,
+      "period": 1.349545,
+      "log10_fap": -13.772,
+      "match": "none"
+    },
+    {
+      "id": "VSX-277946",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 794,
+      "cat_period": 0.33718,
+      "period": 0.168583,
+      "log10_fap": -149.601,
+      "match": "harmonic"
+    },
+    {
+      "id": "VSX-283615",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 109,
+      "cat_period": 64.88548,
+      "period": 0.218133,
+      "log10_fap": -0.776,
+      "match": "none"
+    },
+    {
+      "id": "VSX-2905207",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 408,
+      "cat_period": 0.264817,
+      "period": 0.360558,
+      "log10_fap": -23.169,
+      "match": "none"
+    },
+    {
+      "id": "VSX-292449",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 986,
+      "cat_period": 0.6121258,
+      "period": 0.61212,
+      "log10_fap": -151.525,
+      "match": "exact"
+    },
+    {
+      "id": "VSX-365989",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 409,
+      "cat_period": 0.329569,
+      "period": 0.164781,
+      "log10_fap": -46.429,
+      "match": "harmonic"
+    },
+    {
+      "id": "VSX-5192940",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 967,
+      "cat_period": 2.1173,
+      "period": 2.11524,
+      "log10_fap": -55.802,
+      "match": "exact"
+    },
+    {
+      "id": "VSX-7407037",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 71,
+      "cat_period": 0.318953,
+      "period": 0.220417,
+      "log10_fap": -0.4,
+      "match": "none"
+    },
+    {
+      "id": "VSX-7420243",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 523,
+      "cat_period": 15.873,
+      "period": 0.496899,
+      "log10_fap": -0.335,
+      "match": "none"
+    },
+    {
+      "id": "VSX-7432003",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 42,
+      "cat_period": 3.11831,
+      "period": null,
+      "log10_fap": null,
+      "match": "none"
+    },
+    {
+      "id": "VSX-7432148",
+      "role": "truth",
+      "label": "catalogued, found elsewhere",
+      "n_points": 42,
+      "cat_period": 0.78742,
+      "period": null,
+      "log10_fap": null,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-1344214300000566",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 69,
+      "cat_period": null,
+      "period": 0.251962,
+      "log10_fap": -0.0,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-1654211100006970",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 91,
+      "cat_period": null,
+      "period": 0.114716,
+      "log10_fap": -0.131,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-1654211100007019",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 94,
+      "cat_period": null,
+      "period": 0.389314,
+      "log10_fap": -0.138,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-1832213100000873",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 65,
+      "cat_period": null,
+      "period": 0.185125,
+      "log10_fap": -0.616,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-1833216100018544",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 66,
+      "cat_period": null,
+      "period": 0.436076,
+      "log10_fap": -0.107,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-1863202100011500",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 62,
+      "cat_period": null,
+      "period": 0.106112,
+      "log10_fap": -0.429,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-352207100006508",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 409,
+      "cat_period": null,
+      "period": 0.498614,
+      "log10_fap": -1.184,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-718208100000012",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 449,
+      "cat_period": null,
+      "period": 0.525001,
+      "log10_fap": -0.181,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-821205300002388",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 196,
+      "cat_period": null,
+      "period": 1.035094,
+      "log10_fap": -0.951,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-821205300002431",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 65,
+      "cat_period": null,
+      "period": 0.187973,
+      "log10_fap": -0.077,
+      "match": "none"
+    },
+    {
+      "id": "ZTFDR-833209200012782",
+      "role": "background",
+      "label": "not catalogued",
+      "n_points": 722,
+      "cat_period": null,
+      "period": 0.220047,
+      "log10_fap": -1.248,
+      "match": "none"
+    }
+  ],
+  "table": [
+    {
+      "exponent": 3,
+      "known": {
+        "catalogued, found by ZTF": {
+          "recovered": 8,
+          "exact": 4,
+          "n": 8
+        },
+        "catalogued, found elsewhere": {
+          "recovered": 5,
+          "exact": 2,
+          "n": 15
+        }
+      },
+      "background": {
+        "not catalogued": {
+          "flagged": 0,
+          "n": 11
+        }
+      }
+    },
+    {
+      "exponent": 5,
+      "known": {
+        "catalogued, found by ZTF": {
+          "recovered": 8,
+          "exact": 4,
+          "n": 8
+        },
+        "catalogued, found elsewhere": {
+          "recovered": 5,
+          "exact": 2,
+          "n": 15
+        }
+      },
+      "background": {
+        "not catalogued": {
+          "flagged": 0,
+          "n": 11
+        }
+      }
+    },
+    {
+      "exponent": 10,
+      "known": {
+        "catalogued, found by ZTF": {
+          "recovered": 8,
+          "exact": 4,
+          "n": 8
+        },
+        "catalogued, found elsewhere": {
+          "recovered": 4,
+          "exact": 2,
+          "n": 15
+        }
+      },
+      "background": {
+        "not catalogued": {
+          "flagged": 0,
+          "n": 11
+        }
+      }
+    },
+    {
+      "exponent": 20,
+      "known": {
+        "catalogued, found by ZTF": {
+          "recovered": 8,
+          "exact": 4,
+          "n": 8
+        },
+        "catalogued, found elsewhere": {
+          "recovered": 4,
+          "exact": 2,
+          "n": 15
+        }
+      },
+      "background": {
+        "not catalogued": {
+          "flagged": 0,
+          "n": 11
+        }
+      }
+    }
+  ],
+  "decision": {
+    "threshold": 5,
+    "primary_stratum": "not catalogued",
+    "positives_passed": 5,
+    "positives_n": 15,
+    "background_passed": 0,
+    "background_n": 11,
+    "difference": 0.3333333333333333,
+    "ci95_low": 0.017165336872956738,
+    "ci95_high": 0.5828645226148023,
+    "verdict": "supported",
+    "reason": ""
+  },
+  "injection": {
+    "threshold": 5,
+    "on": "real r-band light curves of background stars that were not flagged",
+    "signal": "a sinusoid, period drawn log-uniformly from 0.11 to 50 days",
+    "bins": [
+      {
+        "amplitude": 0.02,
+        "recovered": 2,
+        "n": 11
+      },
+      {
+        "amplitude": 0.05,
+        "recovered": 6,
+        "n": 11
+      },
+      {
+        "amplitude": 0.1,
+        "recovered": 6,
+        "n": 11
+      },
+      {
+        "amplitude": 0.2,
+        "recovered": 8,
+        "n": 11
+      }
+    ]
+  }
+}

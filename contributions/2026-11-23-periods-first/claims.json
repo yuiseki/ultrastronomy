@@ -1,0 +1,11 @@
+[
+  {"kind": "inferred", "text": "On this sample the plain search finds about a third of the variables catalogued without ZTF, and flags none of the uncatalogued stars.", "basis": "measured.md: 5 of 15 against 0 of 11 at 10^-5. The interval of the difference barely clears zero."},
+  {"kind": "inferred", "text": "The level chosen hardly matters here.", "basis": "measured.md: the counts at 10^-3, 10^-5, 10^-10 and 10^-20 differ by one star."},
+  {"kind": "inferred", "text": "Finding every period that ZTF itself catalogued, against a third of the others, is what circular agreement looks like, and is why the two groups are kept apart.", "basis": "measured.md: 8 of 8 against 5 of 15."},
+  {"kind": "inferred", "text": "Some of the misses are probably one-day aliases, which the matching rule does not accept.", "basis": "results.json: for some catalogued stars the search is confident, with log10_fap far below -5, in a period whose frequency differs from the catalogued one by close to one cycle per day. The rule counts only the period, its half and its double. It was not changed after seeing this."},
+  {"kind": "inferred", "text": "The background light curves are shallow, so the search is not sensitive on them, and none flagged is weak evidence.", "basis": "measured.md: a 0.2 magnitude sinusoid is found in 8 of 11 and a 0.05 magnitude one in 6 of 11. Most background stars in results.json have fewer than 100 epochs."},
+  {"kind": "unverified", "text": "Why each catalogued period was missed.", "basis": "Too few epochs, a faint signal, an alias, a non-sinusoidal shape and a wrong catalogued period all give the same outcome, and nothing in this run separates them."},
+  {"kind": "unverified", "text": "Whether any uncatalogued star in the sample varies.", "basis": "None was flagged, and with this sensitivity that says little."},
+  {"kind": "unverified", "text": "Whether the catalogued periods are right.", "basis": "They are taken from VSX as given."},
+  {"kind": "unverified", "text": "Whether the background flag rate of this run holds elsewhere.", "basis": "Another agent's unfinished run on a different seed, not part of any record, had well-sampled background stars flagged at periods near one day, half a day and a month. This sample has few well-sampled background stars."}
+]

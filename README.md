@@ -8,7 +8,10 @@ It is early. There are two missions, and neither looks for anything new.
 
 ## What a run does
 
-Astronomers went back through six years of the Zwicky Transient Facility's alerts and reported 23 objects that had been overlooked. The first mission asks: with a simple fixed screen, how many of those would be kept, and how much of everything else would be kept with them?
+A run takes objects whose answer is already known and asks how well a fixed, simple method finds them, and how much else it flags.
+
+- `ztf-known-periods`: thousands of stars are catalogued as varying with a regular period. With the Zwicky Transient Facility's public light curves and a plain period search, for how many is the catalogued period found, and how often is a star flagged that no catalogue lists?
+- `ztf-nuclear-transients`: astronomers went back through six years of ZTF alerts and reported 23 objects that had been overlooked. With a simple fixed screen, how many of those would be kept, and how much of everything else?
 
 Each run samples different weeks of the archive. Pooled, the runs measure how much of everything else the screen lets through. The known objects are the same in every run, so that side is measured once. A search that has been measured on known objects is the starting point for any later search for unknown ones.
 
@@ -28,7 +31,7 @@ For a real run, open your agent in this directory and say:
 
 > Read AGENTS.md and take me through an ultrastronomy run. My budget is 30 minutes.
 
-The agent writes a plan, locks it, makes about 110 small requests to the Fink broker's public API (roughly eight minutes), and reports back. You can also do every step by hand: `uv run ultra status runs/<name>` always names the next command.
+The agent writes a plan, locks it, makes about 50 small requests to public astronomy archives (roughly ten minutes), computes for a few more, and reports back. You can also do every step by hand: `uv run ultra status runs/<name>` always names the next command.
 
 ## What your agent can and cannot do
 
@@ -52,7 +55,13 @@ The harness does not make a record trustworthy on its own. Files on a participan
 
 ## Where it stands
 
-[RESULTS.md](RESULTS.md) is generated from the contributed records and cannot be edited by hand without a test failing. Today it says two things. The screen keeps about three quarters of the known objects and almost none of the bulk of the alert stream. And two catalogue flags about the host galaxy do that just as well as the full screen: the light-curve criteria add nothing this sample can show. The first mission has mostly measured its own screen and found it wanting, which is what a rediscovery test is for.
+[RESULTS.md](RESULTS.md) is generated from the contributed records and cannot be edited by hand without a test failing.
+
+For the periods mission it has one run: a plain period search finds about a third of the variable stars that other telescopes catalogued, and all of those ZTF catalogued itself. How often it flags an ordinary star is not settled, and is what more runs would measure.
+
+For the transients mission it has two runs. The screen keeps about three quarters of the known objects and almost none of the bulk of the alert stream, and two catalogue flags about the host galaxy do that just as well as the full screen: the light-curve criteria add nothing this sample can show.
+
+Both missions have mostly measured their own method and found it wanting, which is what a rediscovery test is for.
 
 ## Contribute
 

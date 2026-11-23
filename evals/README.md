@@ -138,10 +138,23 @@ It also pointed out that objects sampled two to a week or two to a patch are not
 
 Three reviews, three sets of holes. The pattern is steady: each time the gates had taken something a run wrote as given, or had read the report less carefully than a person would. The first is now closed as far as local files allow; the second will always have another case.
 
+## 7. The second mission, with a third agent
+
+The harness task, with no mission named, was given to Qoder in a container. It chose `ztf-known-periods` as `AGENTS.md` suggests, wrote and locked a plan (level 10^-3, seed 823941), fetched, and evaluated. It then ran out of its 40 minutes: the period search of that version took about five minutes per pass, and the gates and the export each repeat it. It left no report and its record is not in `contributions/`.
+
+What its unfinished run showed, unverified and from its `measured.md` only:
+
+- 6 of 13 variables catalogued without ZTF found, and 9 of 16 uncatalogued stars flagged at 10^-3: the opposite picture from the maintainer's run on another seed, where none of 11 was flagged.
+- The flagged uncatalogued stars had many epochs, and their periods sat near one day, half a day and a month.
+
+Two things followed. The search was made about four times faster without changing its formula, with a test against the textbook form. And what a record stores was rounded, after a test showed that searching two series together and apart differ in the fourteenth digit: a record has to recompute to the same numbers on a machine with a different linear-algebra library.
+
+A run of this mission by an outside agent, from start to export, has not yet happened.
+
 ## What has not been measured
 
 - The fourth version of the gates has not been attacked.
-- Codex and Gemini CLI have not been tried. OpenCode has, once.
+- Codex and Gemini CLI have not been tried. OpenCode has completed a run of the first mission; Qoder started the second and ran out of time.
 - The bare condition has not been run with a weaker model, so there is still no measurement of whether the harness makes a weaker model more correct, only that such a model can complete a run.
 - No person who is not the author has followed the README.
 - Each condition was run once.

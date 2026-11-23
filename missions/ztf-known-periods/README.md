@@ -34,6 +34,12 @@ A `not catalogued` star that is flagged is one of three things: a variable no ca
 
 Taking one further is a person's work, outside a run: look at the folded light curve, check other catalogues and surveys, rule out a neighbour and an instrumental period, and follow VSX's submission guidelines. A run never submits anything.
 
+## What the first runs suggest
+
+[RESULTS.md](../../RESULTS.md) has the pooled table. With one run in it, the search found the period of about a third of the variables catalogued without ZTF, and of every variable ZTF catalogued itself.
+
+How often it flags an ordinary star is not settled. In the one recorded run it flagged none of 11, but those light curves were short. In another agent's unfinished run, which is not a record, more than half of 16 were flagged at the loosest level, at periods near one day, half a day and a month: the rhythm of the observing schedule and of the Moon. The false-alarm probability means little for a star with a thousand epochs, and the rate will depend on how well-sampled the background stars of a run happen to be. More runs are what this needs.
+
 ## Known limits
 
 - VSX is not complete, so `not catalogued` contains real variables. The flag rate of the background is an upper bound on false flags, not a false-alarm rate.

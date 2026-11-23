@@ -1,0 +1,26 @@
+{
+  "mission": "ztf-known-periods",
+  "kind": "replication",
+  "claim": "At a false-alarm probability below 10^-5, the catalogued period is found for a larger share of variables catalogued without ZTF than the share of uncatalogued stars that are flagged.",
+  "decision_rule": {
+    "threshold": 5,
+    "primary_stratum": "not catalogued"
+  },
+  "rationale": "5 is the middle of the levels the measured text reports. It was chosen before any light curve of this sample had been searched, in an earlier attempt at this same plan.",
+  "failure_interpretation": "On this sample a plain period search does not separate catalogued variables from other stars at this level. The level, the groups and the seed will not be changed to recover the claim.",
+  "alternative_explanations": [
+    "VSX is incomplete: some uncatalogued stars that are flagged are real variables, which lowers the difference without the search being wrong.",
+    "Catalogue errors: a catalogued period that is not found may be wrong in the catalogue.",
+    "Chance: at most 16 stars per group, fewer where patches are sparse, and stars from one patch are not independent.",
+    "Selection: only variables between magnitude 13.5 and 19 with periods of 0.11 to 90 days are used, which is where this search can work."
+  ],
+  "seen_before_lock": "This is a repeat, not a first look. The same plan, with this seed, threshold and sample, was locked and evaluated three times before with earlier versions of the search code, which were replaced for speed and for rounding and not for their answers. I saw the full results each time: 5 of 15 against 0 of 11. I also saw the results of another agent's unfinished run on a different seed, where 9 of 16 uncatalogued stars were flagged at 10^-3. Nothing in the plan was changed after seeing any of this. Before the first lock I had seen one ZTF light curve of one VSX entry and the VSX listings of four patches.",
+  "ai_budget": "Maintainer's first run of the periods mission: one pass, stop after the gates.",
+  "data": {
+    "source": "irsa",
+    "seed": 90210,
+    "patches": 8,
+    "per_stratum": 2,
+    "max_requests": 60
+  }
+}
